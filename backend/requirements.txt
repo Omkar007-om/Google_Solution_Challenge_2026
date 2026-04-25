@@ -1,8 +1,17 @@
-fastapi==0.115.0
-uvicorn[standard]==0.30.6
-langchain==0.3.7
-langgraph==0.2.53
-langchain-aws==0.2.7
-boto3==1.35.0
-pydantic==2.9.0
-python-dotenv==1.0.1
+# ── SAR Multi-Agent Backend ──────────────────────────────
+# Core
+fastapi>=0.115.0
+uvicorn[standard]>=0.34.0
+pydantic>=2.13.0
+pydantic-settings>=2.9.0
+
+# Async
+httpx>=0.28.0
+anyio>=4.9.0
+
+# Utils
+python-dotenv>=1.1.0
+python-json-logger>=3.3.0
+
+# Dev
+rich>=14.0.0
