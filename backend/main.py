@@ -3,12 +3,15 @@ NEXUS 2.0 — FastAPI Application Entry Point
 SAR Narrative Generator with Glass-Box Audit Trail
 """
 
+import traceback
+
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 
-from database import init_db, insert_case, get_case, get_all_cases
+from database import init_db, insert_case, update_case, get_case, get_all_cases
 from models import AlertSubmission, SARResult, CaseSummary
 from sample_data import get_sample_alert
+from workflow import run_pipeline
 
 # ── Initialise app ──
 app = FastAPI(
@@ -60,9 +63,8 @@ def sample_alert(case_type: str = "elder_exploitation"):
 @app.post("/api/generate-sar", response_model=SARResult)
 def generate_sar(submission: AlertSubmission):
     """
-    Submit an alert to the SAR generation pipeline.
-    Phase 4 will wire this up to the LangGraph workflow.
-    For now, it stores the case and returns a stub.
+    Submit an alert to the full LangGraph SAR generation pipeline.
+    Runs: mask_pii → router → typology → narrative → compliance_judge → unmask
     """
     # Check for duplicate
     existing = get_case(submission.case_id)
@@ -72,17 +74,50 @@ def generate_sar(submission: AlertSubmission):
             detail=f"Case {submission.case_id} already exists. Use GET /api/cases/{{case_id}} to retrieve it.",
         )
 
-    # Persist to DB
-    row = insert_case(submission.case_id, submission.alert_data)
+    # Persist initial row
+    insert_case(submission.case_id, submission.alert_data)
+    update_case(submission.case_id, status="processing")
 
-    # TODO (Phase 4): invoke LangGraph workflow here
-    return SARResult(
-        case_id=row["case_id"],
-        status=row["status"],
-        audit_log=[
-            {"step": "intake", "action": "Case received and persisted", "data": f"case_id={row['case_id']}"}
-        ],
-    )
+    try:
+        # ── Run the LangGraph pipeline ──
+        result = run_pipeline(submission.case_id, submission.alert_data)
+
+        # ── Persist all results back to the DB ──
+        update_case(
+            submission.case_id,
+            masked_data=result["masked_data"],
+            pii_mapping=result["pii_mapping"],
+            detected_typology=result["detected_typology"],
+            typology_analysis=result["typology_analysis"],
+            draft_sar_masked=result["draft_sar_masked"],
+            final_sar_clean=result["final_sar_clean"],
+            compliance_score=result["compliance_score"],
+            audit_log=result["audit_log"],
+            status="completed",
+        )
+
+        return SARResult(
+            case_id=result["case_id"],
+            detected_typology=result["detected_typology"],
+            typology_analysis=result["typology_analysis"],
+            draft_sar_masked=result["draft_sar_masked"],
+            final_sar_clean=result["final_sar_clean"],
+            compliance_score=result["compliance_score"],
+            audit_log=result["audit_log"],
+            status="completed",
+        )
+
+    except Exception as e:
+        # Log the error and mark the case as failed
+        error_msg = f"{type(e).__name__}: {str(e)}"
+        print(f"[NEXUS ERROR] Pipeline failed for {submission.case_id}: {error_msg}")
+        traceback.print_exc()
+        update_case(
+            submission.case_id,
+            status="failed",
+            audit_log=[{"step": "pipeline_error", "action": "Pipeline failed", "data": error_msg}],
+        )
+        raise HTTPException(status_code=500, detail=f"Pipeline failed: {error_msg}")
 
 
 @app.get("/api/cases", response_model=list[CaseSummary])

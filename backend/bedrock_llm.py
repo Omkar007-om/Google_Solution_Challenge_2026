@@ -23,6 +23,10 @@ def _get_client():
     """Lazy-init the Bedrock Runtime client."""
     global _client
     if _client is None:
+        # Check if we are in mock mode
+        if os.getenv("MOCK_LLM", "false").lower() == "true":
+            return "MOCK"
+            
         _client = boto3.client(
             "bedrock-runtime",
             region_name=AWS_REGION,
@@ -38,17 +42,21 @@ def invoke_claude(
 ) -> str:
     """
     Send a single-turn message to Claude via Bedrock and return the text response.
-
-    Args:
-        system_prompt: The system-level instruction.
-        user_message: The user-turn content.
-        temperature: Sampling temperature (lower = more deterministic).
-        max_tokens: Max response tokens (defaults to env config).
-
-    Returns:
-        The assistant's text response.
+    Supports MOCK_LLM=true for testing without credentials.
     """
     client = _get_client()
+
+    if client == "MOCK":
+        # Simulate responses based on the system prompt keywords
+        if "EXACTLY ONE of the following typologies" in system_prompt:
+            return "Elder Financial Exploitation"
+        if "senior AML investigator" in system_prompt:
+            return "1. **Pattern Summary**: The case involves a possible elder exploitation scenario. \n2. **Key Indicators**: Large cash withdrawals and new POA. \n3. **Transaction Flow**: ACCT-001 to ACCT-002. \n4. **Risk Assessment**: High. \n5. **Regulatory Triggers**: BSA SAR filing required."
+        if "expert SAR (Suspicious Activity Report) narrative" in system_prompt:
+            return "This SAR narrative describes suspicious activity involving [PERSON_1] and [PERSON_2]. [PERSON_1] is a long-term customer who recently added [PERSON_2] as Power of Attorney. Following this, several large withdrawals and transfers to [PERSON_2]'s account were observed. This behavior is consistent with elder financial exploitation."
+        if "Compliance Officer reviewing a SAR" in system_prompt:
+            return "SCORE: 9\nFEEDBACK: Excellent narrative that clearly connects the suspicious patterns with the transaction data. Masking is correctly applied."
+        return "Mock response: System prompt not recognized."
 
     body = {
         "anthropic_version": "bedrock-2023-05-31",
