@@ -29,11 +29,13 @@ from fastapi.responses import JSONResponse
 
 from app.config import get_settings
 from app.core.cache import pipeline_cache
+from app.core.database import init_db, close_pool
 from app.core.exceptions import SARBaseException
 from app.core.logger import logger
 from app.core.middleware import RequestContextMiddleware
 from app.routes.analyze import router as analyze_router
 from app.routes.auth import router as auth_router
+from app.routes.feedback import router as feedback_router
 from app.routes.pipeline import router as pipeline_router
 
 
@@ -50,9 +52,16 @@ async def lifespan(app: FastAPI):
         settings.app_env,
         settings.debug,
     )
+    # Initialize database on startup
+    try:
+        await init_db()
+        logger.info("✅ Database initialized")
+    except Exception as exc:
+        logger.warning("⚠️  Database initialization failed: %s", str(exc))
     yield
     # Cleanup on shutdown
     pipeline_cache.clear()
+    await close_pool()
     logger.info("👋 Application shut down gracefully")
 
 
@@ -100,6 +109,7 @@ def create_app() -> FastAPI:
     # ── Routes ───────────────────────────────────────────
     app.include_router(analyze_router, prefix="/api/v1")
     app.include_router(auth_router, prefix="/api/v1")
+    app.include_router(feedback_router, prefix="/api/v1")
     app.include_router(pipeline_router, prefix="/api/v1")
 
     # ── Health Check ─────────────────────────────────────
@@ -124,6 +134,8 @@ def create_app() -> FastAPI:
             "docs": "/docs",
             "health": "/health",
             "analyze": "/api/v1/analyze",
+            "feedback": "/api/v1/feedback",
+            "feedback_stats": "/api/v1/feedback/stats",
             "pipeline_info": "/api/v1/pipeline/info",
         }
 

@@ -1,20 +1,18 @@
 """
-SAR Multi-Agent Backend — Pipeline Orchestrator
-================================================
-The orchestrator is responsible for:
-  1. Registering agents in execution order
-  2. Running the pipeline sequentially (output_n → input_{n+1})
-  3. Collecting per-agent timing & status metadata
-  4. Aborting on first failure with full trace context
-  5. Providing pipeline introspection metadata
+Nexus 2.0 — Lightweight Sequential State Orchestrator
+========================================================
+Pure functional state-passing pipeline using TypedDict.
+No LangGraph — fast, explicit, fully auditable.
 
-Adding / removing agents is a one-line change in ``AGENT_REGISTRY``.
-
-Architecture:
-    ┌──────────┐    ┌──────────────┐    ┌─────────────────┐    ┌────────────────┐    ┌─────────────────┐
-    │  Input   │ →  │ Preprocessing│ →  │ Feature         │ →  │ Analysis       │ →  │ Output          │
-    │  Handler │    │              │    │ Processing      │    │ Engine         │    │ Formatter       │
-    └──────────┘    └──────────────┘    └─────────────────┘    └────────────────┘    └─────────────────┘
+Architecture (matches handwritten 5-layer diagram):
+    ┌──────────┐    ┌──────────────┐    ┌──────────────┐    ┌──────────────┐    ┌──────────────┐
+    │  Data    │ →  │   Privacy    │ →  │    Triage    │ →  │     Risk     │ →  │     SAR      │
+    │ Ingestor │    │    Guard     │    │   Firewall   │    │   Analyzer   │    │   Drafter    │
+    └──────────┘    └──────────────┘    └──────────────┘    └──────────────┘    └──────────────┘
+         │               │                   │                   │                   │
+         └───────────────┴───────────────────┴───────────────────┴───────────────────┘
+                                      ↓
+                         equilibrium_audit_log (Glass-Box Trail)
 """
 
 from __future__ import annotations
@@ -22,117 +20,109 @@ from __future__ import annotations
 import time
 from typing import Any
 
-from app.agents import (
-    InputHandlerAgent,
-    PreprocessingAgent,
-    FeatureProcessingAgent,
-    AnalysisEngineAgent,
-    OutputFormatterAgent,
-    ComplianceOfficerAgent,
-    ReviewerAgent,
+from app.agents.stateful_agents import (
+    data_ingestor,
+    privacy_guard,
+    triage_firewall,
+    risk_analyzer,
+    sar_drafter,
+    deanonymizer,
 )
-from app.agents.base import BaseAgent
-from app.core.exceptions import AgentError, PipelineError
+from app.core.state import NexusState, init_state
+from app.core.exceptions import PipelineError
 from app.core.logger import logger
 
 
-# ── Agent Registry ───────────────────────────────────────
-# Order matters — agents execute top-to-bottom.
-# To add a new agent: instantiate it and insert it at the
-# desired position.  To remove one: delete or comment it out.
-
-AGENT_REGISTRY: list[BaseAgent] = [
-    InputHandlerAgent(),
-    PreprocessingAgent(),
-    FeatureProcessingAgent(),
-    AnalysisEngineAgent(),
-    OutputFormatterAgent(),
-    ComplianceOfficerAgent(),
-    ReviewerAgent(),
+FUNCTIONAL_AGENTS = [
+    ("ingestion", data_ingestor),
+    ("privacy", privacy_guard),
+    ("triage", triage_firewall),
 ]
 
 
 def get_pipeline_info() -> dict[str, Any]:
-    """Return metadata about the current pipeline configuration.
-
-    Used by the ``/pipeline/info`` introspection endpoint.
-    """
+    """Return metadata about the current functional pipeline configuration."""
     return {
-        "total_agents": len(AGENT_REGISTRY),
+        "total_agents": len(FUNCTIONAL_AGENTS) + 2,
         "agents": [
-            {
-                "step": idx,
-                "name": agent.name,
-                "class": type(agent).__name__,
-                "retries": agent.retries,
-                "retry_delay": agent.retry_delay,
-            }
-            for idx, agent in enumerate(AGENT_REGISTRY, start=1)
+            {"step": idx, "name": name, "class": "FunctionalStateAgent", "retries": 0, "retry_delay": 0.5}
+            for idx, (name, _) in enumerate(FUNCTIONAL_AGENTS, start=1)
+        ] + [
+            {"step": 4, "name": "risk_analyzer", "class": "FunctionalStateAgent", "retries": 0, "retry_delay": 0.5},
+            {"step": 5, "name": "sar_drafter", "class": "FunctionalStateAgent", "retries": 0, "retry_delay": 0.5},
         ],
+        "pattern": "lightweight_sequential_state",
+        "version": "2.0.0",
     }
 
 
-async def run_pipeline(raw_input: Any) -> dict[str, Any]:
-    """Execute every registered agent sequentially.
+async def run_pipeline(raw_input: dict[str, Any]) -> NexusState:
+    """Execute functional agents sequentially with state passing.
 
     Args:
-        raw_input: The unprocessed user payload.
+        raw_input: The unprocessed user payload with transactions.
 
     Returns:
-        A dict containing:
-            - ``result``:    Final SAR output from the last agent.
-            - ``metadata``:  Per-agent execution trace (name, status, time).
+        NexusState containing draft_sar, audit_log, and all intermediate state.
 
     Raises:
         PipelineError: If any agent in the chain fails.
     """
-    agent_count = len(AGENT_REGISTRY)
-    logger.info("═══ Pipeline started with %d agent(s) ═══", agent_count)
+    logger.info("═══ Nexus 2.0 Pipeline Started (Lightweight State Pattern) ═══")
     pipeline_start = time.perf_counter()
 
-    current_data = raw_input
-    trace: list[dict[str, Any]] = []
+    # Initialize state
+    state = init_state(raw_input)
 
-    for idx, agent in enumerate(AGENT_REGISTRY, start=1):
+    try:
+        # Core pipeline (always runs)
+        for step_name, agent_fn in FUNCTIONAL_AGENTS:
+            step_start = time.perf_counter()
+            state = await agent_fn(state)
+            elapsed = round(time.perf_counter() - step_start, 4)
+            logger.info("✔  [%s] completed in %.4fs", step_name, elapsed)
+
+        # Conditional branch based on triage
+        triage_rec = state["triage_score"]["recommendation"]
+
+        if triage_rec == "SKIP":
+            logger.info("⚡ Triage recommends SKIP — bypassing heavy analysis")
+            state["risk_findings"] = {
+                "features": {},
+                "risk": {"score": 0, "level": "LOW", "factors": [], "shap_explanation": {}},
+                "reasoning": {
+                    "summary": "Low risk signals — triage firewall recommended skipping full analysis.",
+                    "recommended_action": "No SAR required",
+                },
+            }
+        else:
+            # Full analysis for FAST and FULL recommendations
+            step_start = time.perf_counter()
+            state = await risk_analyzer(state)
+            logger.info("✔  [risk_analyzer] completed in %.4fs", round(time.perf_counter() - step_start, 4))
+
+            step_start = time.perf_counter()
+            state = await sar_drafter(state)
+            logger.info("✔  [sar_drafter] completed in %.4fs", round(time.perf_counter() - step_start, 4))
+
+        # Deanonymize before returning
         step_start = time.perf_counter()
+        state = await deanonymizer(state)
+        logger.info("✔  [deanonymizer] completed in %.4fs", round(time.perf_counter() - step_start, 4))
 
-        try:
-            current_data = await agent.execute(current_data)
-            step_elapsed = round(time.perf_counter() - step_start, 4)
-            trace.append({
-                "step": idx,
-                "agent": agent.name,
-                "status": "success",
-                "duration_s": step_elapsed,
-            })
-
-        except AgentError as exc:
-            step_elapsed = round(time.perf_counter() - step_start, 4)
-            trace.append({
-                "step": idx,
-                "agent": agent.name,
-                "status": "failed",
-                "duration_s": step_elapsed,
-                "error": exc.message,
-            })
-            logger.error(
-                "═══ Pipeline ABORTED at step %d/%d [%s] ═══",
-                idx, agent_count, agent.name,
-            )
-            raise PipelineError(
-                message=f"Pipeline failed at step {idx}/{agent_count} ({agent.name})",
-                failed_agent=agent.name,
-                details={"trace": trace, "error": exc.message},
-            ) from exc
+    except Exception as exc:
+        logger.error("═══ Pipeline ABORTED ═══")
+        raise PipelineError(
+            message=f"Pipeline failed: {str(exc)}",
+            failed_agent="unknown",
+            details={"error": str(exc), "audit_log": state.get("equilibrium_audit_log", [])},
+        ) from exc
 
     total_elapsed = round(time.perf_counter() - pipeline_start, 4)
     logger.info("═══ Pipeline completed in %.4fs ═══", total_elapsed)
 
-    return {
-        "result": current_data,
-        "metadata": {
-            "total_duration_s": total_elapsed,
-            "agents_executed": len(trace),
-            "trace": trace,
-        },
-    }
+    # Add timing metadata
+    state["metadata"]["total_duration_s"] = total_elapsed
+    state["metadata"]["completed_at"] = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
+
+    return state
