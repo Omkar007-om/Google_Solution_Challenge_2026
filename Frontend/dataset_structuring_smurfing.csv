@@ -1,0 +1,11 @@
+transaction_id,timestamp,subject_account,counterparty_account,amount,currency,origin_country,destination_country,channel,merchant_category,device_id,ip_address,risk_score,notes
+SMURF-01,2026-05-01T09:15:00Z,ACC-1010,ACC-7781,9900,USD,US,KY,wire,consulting,DVC-XYZ,192.168.1.10,75,Near threshold transfer
+SMURF-02,2026-05-01T14:30:00Z,ACC-1010,ACC-7782,9850,USD,US,KY,wire,consulting,DVC-XYZ,192.168.1.10,76,Near threshold transfer
+SMURF-03,2026-05-02T10:05:00Z,ACC-1010,ACC-7783,9950,USD,US,KY,wire,consulting,DVC-XYZ,192.168.1.10,80,Structuring suspected
+SMURF-04,2026-05-02T16:45:00Z,ACC-1010,ACC-7784,9800,USD,US,KY,wire,consulting,DVC-XYZ,192.168.1.10,82,Structuring suspected
+SMURF-05,2026-05-03T09:20:00Z,ACC-1010,ACC-7785,9990,USD,US,KY,wire,consulting,DVC-XYZ,192.168.1.10,85,Clear structuring pattern
+SMURF-06,2026-05-03T11:10:00Z,ACC-1010,ACC-7786,9900,USD,US,KY,wire,consulting,DVC-XYZ,192.168.1.10,88,Clear structuring pattern
+SMURF-07,2026-05-04T08:30:00Z,ACC-1010,ACC-7787,9750,USD,US,KY,wire,consulting,DVC-XYZ,192.168.1.10,90,Smurfing operation
+SMURF-08,2026-05-04T15:15:00Z,ACC-1010,ACC-7788,9950,USD,US,KY,wire,consulting,DVC-XYZ,192.168.1.10,92,Smurfing operation
+SMURF-09,2026-05-05T10:00:00Z,ACC-1010,ACC-7789,9850,USD,US,KY,wire,consulting,DVC-XYZ,192.168.1.10,95,Smurfing operation
+SMURF-10,2026-05-05T14:40:00Z,ACC-1010,ACC-7790,9980,USD,US,KY,wire,consulting,DVC-XYZ,192.168.1.10,96,Smurfing operation

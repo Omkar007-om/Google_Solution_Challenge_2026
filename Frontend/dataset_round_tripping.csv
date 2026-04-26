@@ -1,0 +1,11 @@
+transaction_id,timestamp,subject_account,counterparty_account,amount,currency,origin_country,destination_country,channel,merchant_category,device_id,ip_address,risk_score,notes
+RT-01,2026-05-01T10:00:00Z,ACC-3030,ACC-4455,500000,USD,GB,KY,wire,corporate_services,DVC-RT01,88.11.22.33,85,Large outbound to offshore entity
+RT-02,2026-05-01T10:05:00Z,ACC-4455,ACC-3030,500000,USD,KY,GB,wire,corporate_services,DVC-RT01,88.11.22.33,90,Exact amount returned immediately
+RT-03,2026-05-02T11:00:00Z,ACC-3030,ACC-4455,750000,USD,GB,KY,wire,corporate_services,DVC-RT01,88.11.22.33,88,Second large outbound
+RT-04,2026-05-02T11:15:00Z,ACC-4455,ACC-3030,750000,USD,KY,GB,wire,corporate_services,DVC-RT01,88.11.22.33,95,Round tripping confirmed
+RT-05,2026-05-03T09:30:00Z,ACC-3030,ACC-8899,25000,USD,GB,AE,wire,consulting,DVC-RT01,88.11.22.33,65,Payment to high risk jurisdiction
+RT-06,2026-05-03T14:20:00Z,ACC-3030,ACC-8899,25000,USD,GB,AE,wire,consulting,DVC-RT01,88.11.22.33,68,Duplicate payment to high risk
+RT-07,2026-05-04T10:00:00Z,ACC-8899,ACC-3030,50000,USD,AE,GB,wire,consulting,DVC-RT01,88.11.22.33,85,Consolidated return of funds
+RT-08,2026-05-05T12:00:00Z,ACC-3030,MERCH-77,150.00,USD,GB,GB,card,restaurant,DVC-RT01,88.11.22.33,5,Normal business lunch
+RT-09,2026-05-06T09:00:00Z,ACC-3030,ACC-4455,1000000,USD,GB,KY,wire,corporate_services,DVC-RT01,88.11.22.33,92,Massive outbound to offshore
+RT-10,2026-05-06T09:45:00Z,ACC-4455,ACC-3030,1000000,USD,KY,GB,wire,corporate_services,DVC-RT01,88.11.22.33,98,Egregious round tripping

@@ -1,0 +1,11 @@
+transaction_id,timestamp,subject_account,counterparty_account,amount,currency,origin_country,destination_country,channel,merchant_category,device_id,ip_address,risk_score,notes
+CLEAN-01,2026-05-01T08:30:00Z,ACC-2020,EMP-551,4500,USD,US,US,ach,salary,DVC-ABC,10.0.0.5,5,Bi-weekly payroll
+CLEAN-02,2026-05-02T18:15:00Z,ACC-2020,MERCH-01,120.50,USD,US,US,card,grocery,DVC-ABC,10.0.0.5,2,Supermarket purchase
+CLEAN-03,2026-05-03T09:00:00Z,ACC-2020,MERCH-02,4.50,USD,US,US,card,coffee_shop,DVC-ABC,10.0.0.5,1,Morning coffee
+CLEAN-04,2026-05-03T12:30:00Z,ACC-2020,MERCH-03,45.00,USD,US,US,card,restaurant,DVC-ABC,10.0.0.5,2,Lunch
+CLEAN-05,2026-05-04T10:00:00Z,ACC-2020,LANDLORD,1500,USD,US,US,ach,housing,DVC-ABC,10.0.0.5,3,Monthly rent payment
+CLEAN-06,2026-05-05T19:45:00Z,ACC-2020,MERCH-04,65.20,USD,US,US,card,gas_station,DVC-ABC,10.0.0.5,2,Fuel
+CLEAN-07,2026-05-06T08:15:00Z,ACC-2020,MERCH-02,5.50,USD,US,US,card,coffee_shop,DVC-ABC,10.0.0.5,1,Morning coffee
+CLEAN-08,2026-05-08T20:00:00Z,ACC-2020,MERCH-05,12.99,USD,US,US,card,entertainment,DVC-ABC,10.0.0.5,1,Streaming subscription
+CLEAN-09,2026-05-10T14:20:00Z,ACC-2020,MERCH-06,85.00,USD,US,US,card,retail,DVC-ABC,10.0.0.5,3,Clothing store
+CLEAN-10,2026-05-12T18:30:00Z,ACC-2020,MERCH-01,95.40,USD,US,US,card,grocery,DVC-ABC,10.0.0.5,2,Supermarket purchase
