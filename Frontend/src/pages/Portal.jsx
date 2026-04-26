@@ -14,7 +14,44 @@ import {
   ShieldHalf,
   User,
   X,
+  Activity,
+  ShieldAlert,
+  Cpu,
 } from 'lucide-react'
+
+function parseReport(reportText) {
+  if (!reportText) return []
+  const sectionHeaders = [
+    { id: 'subject_info', title: 'Subject Information', header: 'Subject Information' },
+    { id: 'executive_summary', title: 'Executive Summary', header: 'Executive Summary' },
+    { id: 'timeline', title: 'Timeline of Material Events', header: 'Timeline of Material Events' },
+    { id: 'aml_guidance', title: 'Retrieved AML Guidance', header: 'Retrieved AML Guidance' },
+    { id: 'transaction_profile', title: 'Transaction Profile', header: 'Transaction Profile' },
+    { id: 'risk_assessment', title: 'Risk Assessment', header: 'Risk Assessment' },
+    { id: 'shap', title: 'SHAP Explainability', header: 'SHAP Explainability' },
+    { id: 'narrative', title: 'Suspicious Activity Narrative', header: 'Suspicious Activity Narrative' },
+    { id: 'key_evidence', title: 'Key Evidence', header: 'Key Evidence' },
+    { id: 'recommended_action', title: 'Recommended Action', header: 'Recommended Action' }
+  ]
+
+  let currentSection = { id: 'general', title: 'General Overview', content: '' }
+  const parsedSections = [currentSection]
+  
+  const lines = reportText.split('\n')
+  for (const line of lines) {
+    const matchedSection = sectionHeaders.find(s => line.trim() === s.header)
+    if (matchedSection) {
+      currentSection = { ...matchedSection, content: '' }
+      parsedSections.push(currentSection)
+    } else {
+      currentSection.content += line + '\n'
+    }
+  }
+
+  // trim content
+  parsedSections.forEach(s => s.content = s.content.trim())
+  return parsedSections.filter(s => s.content)
+}
 
 function Navbar({ username, authed, onLogout }) {
   return (
@@ -257,6 +294,7 @@ function UploadPage({ username, onLogout }) {
   const [busy, setBusy] = useState(false)
   const [result, setResult] = useState(null)
   const [showJson, setShowJson] = useState(false)
+  const [activeTab, setActiveTab] = useState('general')
 
   const totals = useMemo(() => {
     const done = files.filter((f) => f.status === 'done')
@@ -337,6 +375,9 @@ function UploadPage({ username, onLogout }) {
     }
   }
 
+  const reportText = result?.result?.formatted_report
+  const parsedSections = useMemo(() => parseReport(reportText), [reportText])
+
   return (
     <div className="w-full px-5 pb-12 pt-[100px]">
       <div className="mx-auto w-full max-w-[980px]">
@@ -385,15 +426,65 @@ function UploadPage({ username, onLogout }) {
 
         {result ? (
           <div className="mt-10 grid grid-cols-1 gap-4">
-            <div className="portal-card p-5">
-              <div className="font-mono text-[11px] uppercase tracking-[0.18em] text-portal-muted">SAR Narrative Report</div>
-              <pre className="mt-3 whitespace-pre-wrap rounded-xl bg-black/30 p-4 font-mono text-[12px] leading-relaxed text-portal-fg/85 ring-1 ring-white/10">
-                {result?.result?.formatted_report || 'Narrative report not available.'}
-              </pre>
+            <div className="portal-card flex min-h-0 flex-col p-5 overflow-hidden">
+              <div className="mb-4 flex items-center justify-between gap-3">
+                <div>
+                  <div className="font-mono text-[11px] uppercase tracking-[0.18em] text-portal-muted">SAR Narrative Report</div>
+                  <div className="mono mt-0.5 text-[11px] text-slate-200/60">Parsed Report Sections</div>
+                </div>
+                {result?.result?.status && (
+                  <div className="rounded-full bg-portal-accent/10 px-3 py-1 text-[11px] font-semibold text-portal-accent ring-1 ring-portal-accent/30">
+                    {result.result.status}
+                  </div>
+                )}
+              </div>
+
+              <div className="flex flex-1 flex-col overflow-hidden">
+                <div className="mb-4 flex gap-2 overflow-x-auto pb-2 custom-scrollbar">
+                  {parsedSections.map((section) => (
+                    <button
+                      key={section.id}
+                      onClick={() => setActiveTab(section.id)}
+                      className={`portal-hover flex whitespace-nowrap items-center gap-2 rounded-lg px-4 py-2 text-[12px] font-medium transition-all ${
+                        activeTab === section.id
+                          ? 'bg-portal-accent/10 text-portal-accent ring-1 ring-portal-accent/30'
+                          : 'bg-white/5 text-slate-300 hover:bg-white/10 hover:text-white'
+                      }`}
+                    >
+                      {section.title}
+                    </button>
+                  ))}
+                </div>
+
+                <div className="flex-1 overflow-y-auto rounded-xl bg-black/20 p-5 ring-1 ring-white/5 custom-scrollbar min-h-[300px] max-h-[500px]">
+                  <AnimatePresence mode="wait">
+                    {parsedSections.map((section) => (
+                      section.id === activeTab && (
+                        <motion.div
+                          key={section.id}
+                          initial={{ opacity: 0, y: 5 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, y: -5 }}
+                          transition={{ duration: 0.2 }}
+                          className="max-w-none"
+                        >
+                          <h3 className="mb-4 text-lg font-bold text-white/90 border-b border-white/10 pb-2">
+                            {section.title}
+                          </h3>
+                          <div className="whitespace-pre-wrap font-mono text-[13px] leading-relaxed text-slate-200/80">
+                            {section.content}
+                          </div>
+                        </motion.div>
+                      )
+                    ))}
+                  </AnimatePresence>
+                </div>
+              </div>
             </div>
+            
             <div className="portal-card p-5">
               <div className="mb-3 flex items-center justify-between gap-3">
-                <div className="font-mono text-[11px] uppercase tracking-[0.18em] text-portal-muted">Case Details</div>
+                <div className="font-mono text-[11px] uppercase tracking-[0.18em] text-portal-muted">Case Details & Trace</div>
                 <button
                   type="button"
                   onClick={() => setShowJson((v) => !v)}
@@ -413,9 +504,21 @@ function UploadPage({ username, onLogout }) {
                 </div>
               </div>
               {showJson ? (
-                <pre className="mt-3 whitespace-pre-wrap rounded-xl bg-black/30 p-4 font-mono text-[12px] leading-relaxed text-portal-fg/85 ring-1 ring-white/10">
-                  {JSON.stringify({ result: result.result, metadata: result.metadata }, null, 2)}
-                </pre>
+                <div className="mt-3 flex flex-col gap-3">
+                  <div className="font-mono text-[11px] text-slate-200/65 flex items-center gap-2">
+                    <Activity className="h-3 w-3" /> Full Result Object
+                  </div>
+                  <pre className="whitespace-pre-wrap rounded-xl bg-black/30 p-4 font-mono text-[12px] leading-relaxed text-portal-fg/85 ring-1 ring-white/10 overflow-auto max-h-[500px] custom-scrollbar">
+                    {JSON.stringify(result.result, null, 2)}
+                  </pre>
+                  
+                  <div className="font-mono text-[11px] text-slate-200/65 flex items-center gap-2 mt-2">
+                    <ShieldAlert className="h-3 w-3" /> Execution Metadata
+                  </div>
+                  <pre className="whitespace-pre-wrap rounded-xl bg-black/30 p-4 font-mono text-[12px] leading-relaxed text-portal-fg/85 ring-1 ring-white/10 overflow-auto max-h-[500px] custom-scrollbar">
+                    {JSON.stringify(result.metadata, null, 2)}
+                  </pre>
+                </div>
               ) : null}
             </div>
           </div>
