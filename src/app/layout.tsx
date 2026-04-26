@@ -1,17 +1,23 @@
 import type { Metadata } from "next";
-import { Inter, Syncopate } from "next/font/google";
+import { Poppins, Source_Serif_4 } from "next/font/google";
 import "./globals.css";
 
-const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
-const syncopate = Syncopate({ 
-  weight: ['400', '700'], 
-  subsets: ["latin"], 
-  variable: "--font-syncopate" 
+const poppins = Poppins({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+  variable: "--font-poppins",
+});
+
+const sourceSerif = Source_Serif_4({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+  style: ["normal", "italic"],
+  variable: "--font-source-serif",
 });
 
 export const metadata: Metadata = {
-  title: "Aventador Scrollytelling",
-  description: "Interactive WebGL/Canvas Experience",
+  title: "Bloom - AI Plant & Floral Design",
+  description: "Innovating the spirit of bloom AI",
 };
 
 export default function RootLayout({
@@ -21,7 +27,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${inter.variable} ${syncopate.variable} antialiased font-inter`}>
+      <body className={`${poppins.variable} ${sourceSerif.variable} antialiased font-poppins`}>
         {children}
       </body>
     </html>

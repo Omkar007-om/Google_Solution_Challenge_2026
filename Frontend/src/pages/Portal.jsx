@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
-import SceneBackground from '../components/SceneBackground.jsx'
 import { ToastProvider, useToasts } from '../components/PortalToasts.jsx'
+import FinanceBackground from '../components/FinanceBackground.jsx'
 import { analyzeCsv, getAnyToken, login, me, setSessionToken, setToken } from '../lib/api.js'
 import {
   Bolt,
@@ -11,14 +11,22 @@ import {
   FolderOpen,
   LockKeyhole,
   LogOut,
-  ShieldHalf,
-  User,
   X,
   Activity,
   ShieldAlert,
-  Cpu,
+  Sparkles, 
+  Download, 
+  Wand2, 
+  BookOpen, 
+  ArrowRight, 
+  Twitter, 
+  Linkedin, 
+  Instagram, 
+  Menu,
+  Plus
 } from 'lucide-react'
 
+// Report Parser
 function parseReport(reportText) {
   if (!reportText) return []
   const sectionHeaders = [
@@ -47,63 +55,18 @@ function parseReport(reportText) {
       currentSection.content += line + '\n'
     }
   }
-
-  // trim content
   parsedSections.forEach(s => s.content = s.content.trim())
   return parsedSections.filter(s => s.content)
 }
 
-function Navbar({ username, authed, onLogout }) {
-  return (
-    <nav
-      className="portal-hover fixed left-0 top-0 z-[100] w-full border-b border-white/10 bg-black/40 px-4 py-4 backdrop-blur-xl md:px-8"
-    >
-      <div className="mx-auto flex max-w-[1180px] items-center justify-between">
-        <div className="flex items-center gap-3 font-semibold tracking-[0.2em] text-portal-fg/90 uppercase">
-          <div className="relative grid h-9 w-9 place-items-center border-2 border-portal-accent text-portal-accent">
-            <ShieldHalf className="h-4 w-4" />
-            <div className="pointer-events-none absolute -inset-1 border border-portal-accent/20" />
-          </div>
-          <span>SAR Intel</span>
-        </div>
-
-        <div className="flex items-center gap-4">
-          <div className="hidden items-center gap-2 font-mono text-[10px] tracking-[0.14em] text-portal-accent md:flex">
-            <span className="relative inline-flex h-2 w-2">
-              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-portal-accent/40" />
-              <span className="relative inline-flex h-2 w-2 rounded-full bg-portal-accent" />
-            </span>
-            SECURE CHANNEL
-          </div>
-
-          {authed ? (
-            <>
-              <div className="hidden items-center gap-2 text-[13px] text-portal-muted md:flex">
-                <div className="grid h-8 w-8 place-items-center rounded-full border border-portal-accent/60 text-portal-accent">
-                  <User className="h-4 w-4" />
-                </div>
-                <span className="font-medium text-portal-fg/80">{username}</span>
-              </div>
-              <button
-                type="button"
-                onClick={onLogout}
-                className="portal-hover inline-flex items-center gap-2 rounded-lg border border-white/10 px-3 py-2 font-mono text-[10px] uppercase tracking-[0.14em] text-portal-muted hover:border-portal-danger/60 hover:text-portal-danger"
-              >
-                <LogOut className="h-4 w-4" />
-                Logout
-              </button>
-            </>
-          ) : null}
-        </div>
-      </div>
-    </nav>
-  )
-}
+// ----------------------------------------------------
+// COMPONENTS ADAPTED TO GRAYSCALE LIQUID GLASS
+// ----------------------------------------------------
 
 function LoginCard({ onAuthed }) {
   const { push } = useToasts()
-  const [username, setUsername] = useState('')
-  const [password, setPassword] = useState('')
+  const [username, setUsername] = useState('admin')
+  const [password, setPassword] = useState('admin')
   const [remember, setRemember] = useState(true)
   const [busy, setBusy] = useState(false)
   const [uErr, setUErr] = useState('')
@@ -143,144 +106,171 @@ function LoginCard({ onAuthed }) {
   }
 
   return (
-    <div className="flex min-h-screen w-full items-center justify-center px-5 py-10">
-      <motion.div
-        initial={{ opacity: 0, y: 16 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
-        className="portal-card relative w-full max-w-[420px] overflow-hidden px-10 py-12 text-center"
-      >
-        <div className="pointer-events-none absolute inset-x-0 top-0 h-px opacity-0 transition-opacity duration-300 hover:opacity-100 portal-accent-line" />
+    <div className="w-full text-center text-white">
+      <div className="mx-auto mb-7 grid h-16 w-16 place-items-center rounded-2xl bg-white/10 text-white">
+        <Fingerprint className="h-7 w-7" />
+      </div>
+      <h2 className="text-[26px] font-medium tracking-tight">Secure Access</h2>
+      <p className="mt-2 text-[14px] leading-relaxed text-white/60">
+        Authenticate to access the Suspicious Activity Report portal.
+      </p>
 
-        <div className="mx-auto mb-7 grid h-16 w-16 place-items-center rounded-2xl bg-portal-accent/10 text-portal-accent ring-1 ring-portal-accent/15">
-          <Fingerprint className="h-7 w-7" />
+      <form onSubmit={onSubmit} className="mt-9 text-left">
+        <div className="mb-5">
+          <label className="mb-2 block text-xs uppercase tracking-widest text-white/50">Agent ID</label>
+          <input
+            value={username}
+            onChange={(e) => {
+              setUsername(e.target.value)
+              setUErr('')
+            }}
+            className="w-full rounded-lg bg-white/10 px-4 py-3 text-[14px] text-white outline-none focus:ring-1 focus:ring-white/50"
+            placeholder="Enter your agent identifier"
+            autoComplete="username"
+            autoFocus
+          />
+          {uErr && <div className="mt-2 text-[11px] text-red-400">{uErr}</div>}
         </div>
-        <h1 className="text-[26px] font-bold tracking-[-0.5px] text-portal-fg">Secure Access</h1>
-        <p className="mt-2 text-[14px] leading-relaxed text-portal-muted">
-          Authenticate to access the Suspicious Activity Report portal and upload datasets for analysis.
-        </p>
 
-        <form onSubmit={onSubmit} className="mt-9 text-left">
-          <div className="mb-5">
-            <label className="mb-2 block font-mono text-[10px] uppercase tracking-[0.18em] text-portal-muted">
-              Agent ID
-            </label>
+        <div className="mb-5">
+          <label className="mb-2 block text-xs uppercase tracking-widest text-white/50">Access Key</label>
+          <input
+            type="password"
+            value={password}
+            onChange={(e) => {
+              setPassword(e.target.value)
+              setPErr('')
+            }}
+            className="w-full rounded-lg bg-white/10 px-4 py-3 text-[14px] text-white outline-none focus:ring-1 focus:ring-white/50"
+            placeholder="Enter your access key"
+            autoComplete="current-password"
+          />
+          {pErr && <div className="mt-2 text-[11px] text-red-400">{pErr}</div>}
+        </div>
+
+        <div className="mb-7 flex items-center justify-between">
+          <label className="flex items-center gap-2 text-[13px] text-white/60 cursor-pointer">
             <input
-              value={username}
-              onChange={(e) => {
-                setUsername(e.target.value)
-                setUErr('')
-              }}
-              className={`portal-hover w-full rounded-lg bg-white/[0.04] px-4 py-3 text-[14px] text-portal-fg outline-none ring-1 ${
-                uErr ? 'ring-portal-danger/60' : 'ring-white/15'
-              } focus:ring-portal-accent/70`}
-              placeholder="Enter your agent identifier"
-              autoComplete="username"
-              autoFocus
+              type="checkbox"
+              checked={remember}
+              onChange={(e) => setRemember(e.target.checked)}
+              className="h-4 w-4"
             />
-            {uErr ? <div className="mt-2 font-mono text-[11px] text-portal-danger">{uErr}</div> : null}
-          </div>
-
-          <div className="mb-5">
-            <label className="mb-2 block font-mono text-[10px] uppercase tracking-[0.18em] text-portal-muted">
-              Access Key
-            </label>
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => {
-                setPassword(e.target.value)
-                setPErr('')
-              }}
-              className={`portal-hover w-full rounded-lg bg-white/[0.04] px-4 py-3 text-[14px] text-portal-fg outline-none ring-1 ${
-                pErr ? 'ring-portal-danger/60' : 'ring-white/15'
-              } focus:ring-portal-accent/70`}
-              placeholder="Enter your access key"
-              autoComplete="current-password"
-            />
-            {pErr ? <div className="mt-2 font-mono text-[11px] text-portal-danger">{pErr}</div> : null}
-          </div>
-
-          <div className="mb-7 flex items-center justify-between">
-            <label className="portal-hover flex items-center gap-2 text-[13px] text-portal-muted">
-              <input
-                type="checkbox"
-                checked={remember}
-                onChange={(e) => setRemember(e.target.checked)}
-                className="h-4 w-4 accent-portal-accent"
-              />
-              Remember session
-            </label>
-            <button
-              type="button"
-              onClick={() => push('Contact your security administrator for key recovery.', 'info')}
-              className="portal-hover text-[12px] text-portal-accent hover:opacity-80"
-            >
-              Forgot key?
-            </button>
-          </div>
-
-          <button
-            type="submit"
-            disabled={busy}
-            className="portal-hover inline-flex w-full items-center justify-center gap-2 rounded-lg bg-portal-accent px-4 py-4 text-[14px] font-bold uppercase tracking-[0.12em] text-portal-bg hover:shadow-[0_0_30px_rgba(0,255,136,0.3)] disabled:opacity-70"
-          >
-            {busy ? (
-              <span className="inline-flex items-center gap-2">
-                <span className="h-4 w-4 animate-spin rounded-full border-2 border-black/30 border-t-black" />
-                Authenticating…
-              </span>
-            ) : (
-              <span className="inline-flex items-center gap-2">
-                <LockKeyhole className="h-4 w-4" />
-                Authenticate
-              </span>
-            )}
+            Remember session
+          </label>
+          <button type="button" className="text-[12px] text-white/80 hover:text-white transition-colors">
+            Forgot key?
           </button>
-        </form>
-
-        <div className="mt-7 border-t border-white/10 pt-6 font-mono text-[11px] leading-relaxed text-portal-muted">
-          256-bit TLS encrypted | Session isolated | Audit logged
         </div>
-      </motion.div>
+
+        <button
+          type="submit"
+          disabled={busy}
+          className="liquid-glass inline-flex w-full items-center justify-center gap-2 rounded-lg px-4 py-4 text-[14px] font-medium tracking-wide hover:scale-[1.02] active:scale-[0.98] transition-transform disabled:opacity-70"
+        >
+          {busy ? (
+            <span className="inline-flex items-center gap-2">
+              <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
+              Authenticating…
+            </span>
+          ) : (
+            <span className="inline-flex items-center gap-2">
+              <LockKeyhole className="h-4 w-4" />
+              Authenticate
+            </span>
+          )}
+        </button>
+      </form>
+    </div>
+  )
+}
+
+function DropZone({ onFiles, disabled }) {
+  const { push } = useToasts()
+  const [drag, setDrag] = useState(false)
+  const inputRef = useRef(null)
+
+  return (
+    <div
+      className={`relative cursor-pointer rounded-2xl border border-dashed px-10 py-16 text-center transition ${
+        drag ? 'border-white bg-white/10' : 'border-white/20 bg-white/5'
+      }`}
+      onClick={() => inputRef.current?.click()}
+      onDragOver={(e) => {
+        e.preventDefault()
+        if (disabled) return
+        setDrag(true)
+      }}
+      onDragLeave={() => setDrag(false)}
+      onDrop={(e) => {
+        e.preventDefault()
+        setDrag(false)
+        if (disabled) return
+        const fl = e.dataTransfer?.files
+        if (fl?.length) onFiles?.(fl)
+      }}
+    >
+      <div className={`mx-auto mb-6 grid h-[72px] w-[72px] place-items-center rounded-full bg-white/10 transition ${drag ? 'scale-110' : ''}`}>
+        <CloudUpload className="h-7 w-7 text-white" />
+      </div>
+      <div className="text-lg font-medium text-white">Drop files here</div>
+      <div className="mt-2 text-[13px] text-white/60">
+        or <span className="text-white underline">browse</span> from your local system
+      </div>
+      <button
+        type="button"
+        onClick={(e) => {
+          e.stopPropagation()
+          inputRef.current?.click()
+        }}
+        className="mt-6 inline-flex items-center gap-2 rounded-lg border border-white/30 px-6 py-3 text-[13px] font-medium text-white hover:bg-white/10 transition-colors"
+      >
+        <FolderOpen className="h-4 w-4" />
+        Browse Files
+      </button>
+      <input
+        ref={inputRef}
+        type="file"
+        accept=".csv,text/csv"
+        multiple
+        disabled={disabled}
+        className="hidden"
+        onChange={(e) => {
+          const fl = e.target.files
+          if (fl?.length) onFiles?.(fl)
+          e.target.value = ''
+        }}
+      />
     </div>
   )
 }
 
 function FileRow({ item, onRemove }) {
   const ext = item.ext.toUpperCase()
-  const tone =
-    item.ext === 'csv'
-      ? 'bg-portal-accent/10 text-portal-accent'
-      : item.ext === 'json'
-        ? 'bg-violet-500/10 text-violet-300'
-        : 'bg-white/[0.04] text-portal-muted'
-
   return (
-    <div className="portal-hover flex items-center gap-4 rounded-xl border border-white/10 bg-white/[0.04] px-5 py-4 backdrop-blur-xl">
-      <div className={`grid h-11 w-11 place-items-center rounded-xl ring-1 ring-white/10 ${tone}`}>
+    <div className="flex items-center gap-4 rounded-xl bg-white/5 px-5 py-4">
+      <div className="grid h-11 w-11 place-items-center rounded-xl bg-white/10 text-white">
         <FileText className="h-5 w-5" />
       </div>
       <div className="min-w-0 flex-1">
-        <div className="truncate text-[13px] font-medium text-portal-fg/90">{item.name}</div>
-        <div className="mt-0.5 font-mono text-[10px] tracking-wide text-portal-muted">
+        <div className="truncate text-[13px] font-medium text-white">{item.name}</div>
+        <div className="mt-0.5 text-[10px] tracking-wide text-white/50">
           {item.sizeLabel} · .{ext}
         </div>
-        <div className="mt-2 h-[3px] w-full overflow-hidden rounded bg-white/[0.06]">
+        <div className="mt-2 h-[3px] w-full overflow-hidden rounded bg-white/10">
           <div
-            className={`${item.status === 'done' ? 'bg-portal-accent' : 'bg-portal-accent2'} h-full transition-[width]`}
+            className="bg-white h-full transition-[width]"
             style={{ width: `${item.progress}%` }}
           />
         </div>
       </div>
-      <div className="shrink-0 font-mono text-[10px] tracking-wide text-portal-muted">
+      <div className="shrink-0 text-[10px] tracking-wide text-white/50">
         {item.status === 'uploading' ? `Uploading ${Math.round(item.progress)}%` : 'Ready'}
       </div>
       <button
         type="button"
         onClick={() => onRemove(item.id)}
-        className="portal-hover rounded-lg p-2 text-portal-muted hover:text-portal-danger"
-        aria-label="Remove file"
+        className="rounded-lg p-2 text-white/50 hover:text-white transition-colors"
       >
         <X className="h-4 w-4" />
       </button>
@@ -288,11 +278,10 @@ function FileRow({ item, onRemove }) {
   )
 }
 
-function UploadPage({ username, onLogout }) {
+function UploadPage({ username, onLogout, analysisResult, setAnalysisResult, parsedSections }) {
   const { push } = useToasts()
   const [files, setFiles] = useState([])
   const [busy, setBusy] = useState(false)
-  const [result, setResult] = useState(null)
   const [showJson, setShowJson] = useState(false)
   const [activeTab, setActiveTab] = useState('general')
 
@@ -310,64 +299,43 @@ function UploadPage({ username, onLogout }) {
 
   function addFiles(list) {
     const arr = Array.from(list || [])
-    let added = 0
     for (const f of arr) {
-      const ext = (f.name.split('.').pop() || '').toLowerCase()
-      if (ext !== 'csv') {
-        push(`"${f.name}" — only .csv is supported for analysis`, 'error')
-        continue
-      }
-      const dup = files.some((x) => x.name === f.name && x.size === f.size)
-      if (dup) {
-        push(`"${f.name}" — already added`, 'info')
+      if (!f.name.toLowerCase().endsWith('.csv')) {
+        push(`"${f.name}" — only .csv is supported`, 'error')
         continue
       }
       const id = `${Date.now()}-${Math.random().toString(16).slice(2)}`
       const item = {
-        id,
-        file: f,
-        name: f.name,
-        size: f.size,
-        sizeLabel: fmtSize(f.size),
-        ext,
-        progress: 0,
-        status: 'uploading',
+        id, file: f, name: f.name, size: f.size, sizeLabel: fmtSize(f.size),
+        ext: 'csv', progress: 0, status: 'uploading',
       }
-      added++
       setFiles((prev) => [...prev, item])
-
-      // simulate upload progress UI only
+      
       let p = 0
       const iv = window.setInterval(() => {
-        p += Math.random() * 18 + 6
-        setFiles((prev) =>
-          prev.map((x) => {
-            if (x.id !== id) return x
-            const done = p >= 100
-            return { ...x, progress: Math.min(100, p), status: done ? 'done' : 'uploading' }
-          }),
-        )
+        p += Math.random() * 20 + 10
+        setFiles((prev) => prev.map((x) => {
+          if (x.id !== id) return x
+          const done = p >= 100
+          return { ...x, progress: Math.min(100, p), status: done ? 'done' : 'uploading' }
+        }))
         if (p >= 100) window.clearInterval(iv)
-      }, 180 + Math.random() * 180)
+      }, 200)
     }
-    if (added) push(`${added} file(s) queued.`, 'success')
   }
 
   function removeFile(id) {
     setFiles((prev) => prev.filter((f) => f.id !== id))
-    push('File removed.', 'info')
   }
 
   async function runAnalysis() {
     const ready = files.filter((f) => f.status === 'done')
     if (!ready.length) return
     setBusy(true)
-    setResult(null)
+    setAnalysisResult(null)
     try {
-      // backend supports single CSV; analyze the first ready file
       const res = await analyzeCsv({ file: ready[0].file, subjectAccount: username })
-      setResult(res)
-      push('SAR analysis completed.', 'success')
+      setAnalysisResult(res)
     } catch (e) {
       push(e?.message || 'Analysis failed', 'error')
     } finally {
@@ -375,257 +343,180 @@ function UploadPage({ username, onLogout }) {
     }
   }
 
-  const reportText = result?.result?.formatted_report
-  const parsedSections = useMemo(() => parseReport(reportText), [reportText])
-
   return (
-    <div className="w-full px-5 pb-12 pt-[100px]">
-      <div className="mx-auto w-full max-w-[980px]">
-        <div className="mb-10">
-          <div className="font-mono text-[11px] uppercase tracking-[0.18em] text-portal-accent">Dataset Upload</div>
-          <div className="mt-3 text-4xl font-bold tracking-[-1px] text-portal-fg">Upload SAR Data</div>
-          <div className="mt-2 text-[15px] leading-relaxed text-portal-muted">
-            Drag and drop your transaction datasets below. Files are validated before processing.
-          </div>
-        </div>
+    <div className="w-full text-white">
+      <div className="mb-10 text-center">
+        <h2 className="text-3xl font-medium tracking-tight">Dataset Upload</h2>
+        <div className="mt-2 text-[14px] text-white/60">Upload your CSV transaction logs for analysis.</div>
+      </div>
 
-        <div className="portal-card overflow-hidden p-0">
-          <DropZone onFiles={addFiles} disabled={busy} />
-        </div>
+      <DropZone onFiles={addFiles} disabled={busy} />
 
-        {files.length ? (
-          <div className="mt-8">
-            <div className="mb-4 font-mono text-[11px] uppercase tracking-[0.18em] text-portal-muted">
-              Uploaded Files
-            </div>
-            <div className="flex flex-col gap-3">
-              {files.map((f) => (
-                <FileRow key={f.id} item={f} onRemove={removeFile} />
-              ))}
-            </div>
-          </div>
-        ) : null}
-
-        {files.length ? (
-          <div className="mt-8 flex flex-wrap items-center justify-between gap-4">
-            <div className="text-[13px] text-portal-muted">
-              <span className="font-semibold text-portal-fg">{totals.ready}</span> files ready ·{' '}
-              <span className="font-semibold text-portal-fg">{fmtSize(totals.totalBytes)}</span> total
-            </div>
+      {files.length > 0 && (
+        <div className="mt-6 flex flex-col gap-3">
+          {files.map((f) => <FileRow key={f.id} item={f} onRemove={removeFile} />)}
+          
+          <div className="mt-4 flex items-center justify-between">
+            <div className="text-[13px] text-white/60">{totals.ready} files ready</div>
             <button
-              type="button"
               onClick={runAnalysis}
               disabled={!totals.ready || busy}
-              className="portal-hover inline-flex items-center gap-2 rounded-lg bg-portal-accent px-8 py-3 text-[13px] font-bold uppercase tracking-[0.12em] text-portal-bg hover:shadow-[0_0_30px_rgba(0,255,136,0.3)] disabled:opacity-30"
+              className="liquid-glass inline-flex items-center gap-2 rounded-lg px-6 py-3 text-[13px] font-medium hover:bg-white/10 disabled:opacity-50"
             >
-              {busy ? <span className="h-4 w-4 animate-spin rounded-full border-2 border-black/30 border-t-black" /> : <Bolt className="h-4 w-4" />}
+              {busy ? <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" /> : <Bolt className="h-4 w-4" />}
               Run Analysis
             </button>
           </div>
-        ) : null}
+        </div>
+      )}
 
-        {result ? (
-          <div className="mt-10 grid grid-cols-1 gap-4">
-            <div className="portal-card flex min-h-0 flex-col p-5 overflow-hidden">
-              <div className="mb-4 flex items-center justify-between gap-3">
-                <div>
-                  <div className="font-mono text-[11px] uppercase tracking-[0.18em] text-portal-muted">SAR Narrative Report</div>
-                  <div className="mono mt-0.5 text-[11px] text-slate-200/60">Parsed Report Sections</div>
-                </div>
-                {result?.result?.status && (
-                  <div className="rounded-full bg-portal-accent/10 px-3 py-1 text-[11px] font-semibold text-portal-accent ring-1 ring-portal-accent/30">
-                    {result.result.status}
-                  </div>
-                )}
-              </div>
-
-              <div className="flex flex-1 flex-col overflow-hidden">
-                <div className="mb-4 flex gap-2 overflow-x-auto pb-2 custom-scrollbar">
-                  {parsedSections.map((section) => (
-                    <button
-                      key={section.id}
-                      onClick={() => setActiveTab(section.id)}
-                      className={`portal-hover flex whitespace-nowrap items-center gap-2 rounded-lg px-4 py-2 text-[12px] font-medium transition-all ${
-                        activeTab === section.id
-                          ? 'bg-portal-accent/10 text-portal-accent ring-1 ring-portal-accent/30'
-                          : 'bg-white/5 text-slate-300 hover:bg-white/10 hover:text-white'
-                      }`}
-                    >
-                      {section.title}
-                    </button>
-                  ))}
-                </div>
-
-                <div className="flex-1 overflow-y-auto rounded-xl bg-black/20 p-5 ring-1 ring-white/5 custom-scrollbar min-h-[300px] max-h-[500px]">
-                  <AnimatePresence mode="wait">
-                    {parsedSections.map((section) => (
-                      section.id === activeTab && (
-                        <motion.div
-                          key={section.id}
-                          initial={{ opacity: 0, y: 5 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          exit={{ opacity: 0, y: -5 }}
-                          transition={{ duration: 0.2 }}
-                          className="max-w-none"
-                        >
-                          <h3 className="mb-4 text-lg font-bold text-white/90 border-b border-white/10 pb-2">
-                            {section.title}
-                          </h3>
-                          <div className="whitespace-pre-wrap font-mono text-[13px] leading-relaxed text-slate-200/80">
-                            {section.content}
-                          </div>
-                        </motion.div>
-                      )
-                    ))}
-                  </AnimatePresence>
-                </div>
-              </div>
-            </div>
-            
-            <div className="portal-card p-5">
-              <div className="mb-3 flex items-center justify-between gap-3">
-                <div className="font-mono text-[11px] uppercase tracking-[0.18em] text-portal-muted">Case Details & Trace</div>
-                <button
-                  type="button"
-                  onClick={() => setShowJson((v) => !v)}
-                  className="portal-hover rounded-md border border-white/10 px-3 py-1 font-mono text-[10px] uppercase tracking-[0.12em] text-portal-muted hover:text-portal-accent hover:border-portal-accent/40"
-                >
-                  {showJson ? 'Hide Raw JSON' : 'Show Raw JSON'}
-                </button>
-              </div>
-              <div className="rounded-xl bg-black/30 p-4 ring-1 ring-white/10">
-                <div className="grid grid-cols-1 gap-2 text-[12px] text-portal-fg/85 sm:grid-cols-2">
-                  <div><span className="text-portal-muted">Report ID:</span> {result?.result?.report_id || '-'}</div>
-                  <div><span className="text-portal-muted">Subject:</span> {result?.result?.subject_information?.subject_account || '-'}</div>
-                  <div><span className="text-portal-muted">Risk Level:</span> {result?.result?.risk_assessment?.level || '-'}</div>
-                  <div><span className="text-portal-muted">Risk Score:</span> {result?.result?.risk_assessment?.score ?? '-'}</div>
-                  <div><span className="text-portal-muted">Decision:</span> {result?.result?.review_decision?.decision || '-'}</div>
-                  <div><span className="text-portal-muted">Action:</span> {result?.result?.investigator_reasoning?.recommended_action || '-'}</div>
-                </div>
-              </div>
-              {showJson ? (
-                <div className="mt-3 flex flex-col gap-3">
-                  <div className="font-mono text-[11px] text-slate-200/65 flex items-center gap-2">
-                    <Activity className="h-3 w-3" /> Full Result Object
-                  </div>
-                  <pre className="whitespace-pre-wrap rounded-xl bg-black/30 p-4 font-mono text-[12px] leading-relaxed text-portal-fg/85 ring-1 ring-white/10 overflow-auto max-h-[500px] custom-scrollbar">
-                    {JSON.stringify(result.result, null, 2)}
-                  </pre>
-                  
-                  <div className="font-mono text-[11px] text-slate-200/65 flex items-center gap-2 mt-2">
-                    <ShieldAlert className="h-3 w-3" /> Execution Metadata
-                  </div>
-                  <pre className="whitespace-pre-wrap rounded-xl bg-black/30 p-4 font-mono text-[12px] leading-relaxed text-portal-fg/85 ring-1 ring-white/10 overflow-auto max-h-[500px] custom-scrollbar">
-                    {JSON.stringify(result.metadata, null, 2)}
-                  </pre>
-                </div>
-              ) : null}
-            </div>
+      {analysisResult && (
+        <div className="mt-8 pt-8 border-t border-white/10">
+          <div className="flex items-center gap-2 mb-6 overflow-x-auto custom-scrollbar pb-2">
+            {parsedSections.map(s => (
+              <button
+                key={s.id}
+                onClick={() => setActiveTab(s.id)}
+                className={`whitespace-nowrap rounded-lg px-4 py-2 text-[12px] font-medium transition-colors ${
+                  activeTab === s.id ? 'bg-white/20 text-white' : 'bg-white/5 text-white/60 hover:bg-white/10'
+                }`}
+              >
+                {s.title}
+              </button>
+            ))}
           </div>
-        ) : null}
+          
+          <div className="rounded-xl bg-black/20 p-5 ring-1 ring-white/10 min-h-[300px] max-h-[500px] overflow-y-auto custom-scrollbar">
+            <AnimatePresence mode="wait">
+              {parsedSections.map(s => s.id === activeTab && (
+                <motion.div key={s.id} initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}}>
+                  <h3 className="mb-4 text-lg font-medium border-b border-white/10 pb-2">{s.title}</h3>
+                  <div className="whitespace-pre-wrap font-mono text-[13px] leading-relaxed text-white/80">{s.content}</div>
+                </motion.div>
+              ))}
+            </AnimatePresence>
+          </div>
 
-        <div className="mt-10 flex justify-end">
-          <button
-            type="button"
-            onClick={onLogout}
-            className="portal-hover inline-flex items-center gap-2 rounded-lg border border-white/10 px-4 py-2 font-mono text-[10px] uppercase tracking-[0.14em] text-portal-muted hover:border-portal-danger/60 hover:text-portal-danger"
-          >
-            <LogOut className="h-4 w-4" />
-            Terminate Session
-          </button>
+          <div className="mt-6 flex justify-between items-center">
+            <button onClick={() => setShowJson(!showJson)} className="text-xs text-white/50 hover:text-white underline">
+              {showJson ? 'Hide Raw JSON' : 'Show Raw JSON'}
+            </button>
+            <button onClick={onLogout} className="text-xs text-red-400 hover:text-red-300 flex items-center gap-1">
+              <LogOut className="w-3 h-3" /> Logout
+            </button>
+          </div>
+
+          {showJson && (
+            <pre className="mt-4 p-4 rounded-xl bg-black/40 text-xs text-white/70 overflow-auto max-h-[300px] custom-scrollbar">
+              {JSON.stringify(analysisResult, null, 2)}
+            </pre>
+          )}
+        </div>
+      )}
+    </div>
+  )
+}
+
+function PatternRecognitionView({ parsedSections }) {
+  if (!parsedSections || parsedSections.length <= 1) {
+    return (
+      <div className="w-full text-white text-center py-16">
+        <Activity size={48} className="mx-auto text-white/20 mb-6" />
+        <h2 className="text-2xl font-medium tracking-tight mb-2">Awaiting Dataset</h2>
+        <p className="text-white/50 text-sm">Upload a CSV in the Automated Reporting module to analyze patterns.</p>
+      </div>
+    )
+  }
+
+  const riskData = parsedSections.find(s => s.id === 'risk_assessment')?.content || 'No risk assessment found.'
+  const shapData = parsedSections.find(s => s.id === 'shap')?.content || 'No SHAP data found.'
+
+  return (
+    <div className="w-full text-white">
+      <div className="mb-10 text-center">
+        <h2 className="text-3xl font-medium tracking-tight">Pattern Recognition</h2>
+        <div className="mt-2 text-[14px] text-white/60">Live behavioral synthesis & anomaly detection.</div>
+      </div>
+      
+      <div className="grid grid-cols-1 gap-6">
+        <div className="liquid-glass rounded-2xl p-6 border border-white/10">
+          <h3 className="text-xs uppercase tracking-widest text-white/50 mb-4 flex items-center gap-2">
+             <Activity size={14} className="text-white/40" /> Risk Assessment
+          </h3>
+          <pre className="whitespace-pre-wrap font-mono text-xs text-white/80 leading-relaxed max-h-[250px] overflow-y-auto custom-scrollbar p-2">
+            {riskData}
+          </pre>
+        </div>
+
+        <div className="liquid-glass rounded-2xl p-6 border border-white/10 flex flex-col gap-3">
+          <h3 className="text-xs uppercase tracking-widest text-white/50 mb-1 flex items-center gap-2">
+             <Bolt size={14} className="text-white/40" /> SHAP Explainability
+          </h3>
+          <pre className="whitespace-pre-wrap font-mono text-xs text-white/80 leading-relaxed max-h-[250px] overflow-y-auto custom-scrollbar p-2">
+            {shapData}
+          </pre>
         </div>
       </div>
     </div>
   )
 }
 
-function DropZone({ onFiles, disabled }) {
-  const { push } = useToasts()
-  const [drag, setDrag] = useState(false)
-  const inputRef = useRef(null)
+function KnowledgeGraphView({ parsedSections }) {
+  if (!parsedSections || parsedSections.length <= 1) {
+    return (
+      <div className="w-full text-white text-center py-16">
+        <ShieldAlert size={48} className="mx-auto text-white/20 mb-6" />
+        <h2 className="text-2xl font-medium tracking-tight mb-2">Awaiting Dataset</h2>
+        <p className="text-white/50 text-sm">Upload a CSV in the Automated Reporting module to build the graph.</p>
+      </div>
+    )
+  }
+
+  const timelineData = parsedSections.find(s => s.id === 'timeline')?.content || 'No timeline available.'
+  const profileData = parsedSections.find(s => s.id === 'transaction_profile')?.content || 'No profile available.'
 
   return (
-    <div
-      className={`portal-hover relative cursor-pointer rounded-2xl border-2 border-dashed px-10 py-16 text-center transition ${
-        drag ? 'border-portal-accent bg-portal-accent/5 shadow-[0_0_40px_rgba(0,255,136,0.06)]' : 'border-white/15 bg-white/[0.03]'
-      }`}
-      onClick={() => inputRef.current?.click()}
-      onDragOver={(e) => {
-        e.preventDefault()
-        if (disabled) return
-        setDrag(true)
-      }}
-      onDragLeave={() => setDrag(false)}
-      onDrop={(e) => {
-        e.preventDefault()
-        setDrag(false)
-        if (disabled) return
-        const fl = e.dataTransfer?.files
-        if (fl?.length) onFiles?.(fl)
-      }}
-    >
-      <div
-        className={`mx-auto mb-6 grid h-[72px] w-[72px] place-items-center rounded-full bg-portal-accent/10 text-portal-accent transition ${
-          drag ? 'scale-110 shadow-[0_0_30px_rgba(0,255,136,0.2)]' : ''
-        }`}
-      >
-        <CloudUpload className="h-7 w-7" />
+    <div className="w-full text-white">
+      <div className="mb-10 text-center">
+        <h2 className="text-3xl font-medium tracking-tight">Knowledge Graph</h2>
+        <div className="mt-2 text-[14px] text-white/60">Immutable ledger and transaction routing paths.</div>
       </div>
-      <div className="text-lg font-semibold text-portal-fg">Drop files here</div>
-      <div className="mt-2 text-[13px] text-portal-muted">
-        or <span className="text-portal-accent underline">browse</span> from your local system
+
+      <div className="grid grid-cols-1 gap-6">
+        <div className="liquid-glass rounded-2xl p-6 border border-white/10 min-h-[300px] flex flex-col gap-4">
+          <h3 className="text-xs uppercase tracking-widest text-white/50 mb-2 flex items-center gap-2">
+            <Activity size={14} /> Ledger Timeline
+          </h3>
+          <pre className="whitespace-pre-wrap font-mono text-xs text-white/80 leading-relaxed max-h-[400px] overflow-y-auto custom-scrollbar p-2 relative before:absolute before:top-4 before:bottom-4 before:left-2 before:w-[2px] before:bg-white/5">
+            {timelineData}
+          </pre>
+        </div>
+
+        <div className="liquid-glass rounded-2xl p-6 border border-white/10 min-h-[200px] flex flex-col gap-4">
+          <h3 className="text-xs uppercase tracking-widest text-white/50 mb-2 flex items-center gap-2">
+            <BookOpen size={14} /> Transaction Profile
+          </h3>
+          <pre className="whitespace-pre-wrap font-mono text-xs text-white/80 leading-relaxed max-h-[300px] overflow-y-auto custom-scrollbar p-2">
+            {profileData}
+          </pre>
+        </div>
       </div>
-      <button
-        type="button"
-        onClick={(e) => {
-          e.stopPropagation()
-          inputRef.current?.click()
-        }}
-        className="portal-hover mt-6 inline-flex items-center gap-2 rounded-lg border border-portal-accent px-6 py-3 text-[13px] font-semibold text-portal-accent hover:bg-portal-accent/10 hover:shadow-[0_0_20px_rgba(0,255,136,0.1)]"
-      >
-        <FolderOpen className="h-4.5 w-4.5" />
-        Browse Files
-      </button>
-      <div className="mt-6 flex flex-wrap justify-center gap-2">
-        {['.CSV'].map((b) => (
-          <span
-            key={b}
-            className="rounded border border-white/10 bg-white/[0.03] px-3 py-1 font-mono text-[10px] tracking-wide text-portal-muted"
-          >
-            {b}
-          </span>
-        ))}
-      </div>
-      <input
-        ref={inputRef}
-        type="file"
-        accept=".csv,text/csv"
-        multiple
-        disabled={disabled}
-        className="hidden"
-        onChange={(e) => {
-          const fl = e.target.files
-          if (fl?.length) onFiles?.(fl)
-          e.target.value = ''
-        }}
-      />
-      <button
-        type="button"
-        onClick={(e) => {
-          e.stopPropagation()
-          push('CSV only for backend analysis in this build.', 'info')
-        }}
-        className="portal-hover pointer-events-auto absolute right-4 top-4 rounded-lg border border-white/10 px-3 py-2 font-mono text-[10px] uppercase tracking-[0.14em] text-portal-muted hover:border-white/20"
-      >
-        Help
-      </button>
     </div>
   )
 }
+
+// ----------------------------------------------------
+// MAIN BLOOM HERO PAGE
+// ----------------------------------------------------
 
 function PortalInner() {
   const [authed, setAuthed] = useState(() => Boolean(getAnyToken()))
   const [username, setUsername] = useState('')
+  const [modalView, setModalView] = useState(() => Boolean(getAnyToken()) ? null : 'login')
+  const [pendingView, setPendingView] = useState(null)
+  
+  const [analysisResult, setAnalysisResult] = useState(null)
+  const parsedSections = useMemo(() => parseReport(analysisResult?.result?.formatted_report), [analysisResult])
 
   useEffect(() => {
     const t = getAnyToken()
@@ -643,51 +534,207 @@ function PortalInner() {
     setSessionToken('')
     setAuthed(false)
     setUsername('')
+    setModalView('login')
   }
 
+  const handleOpenView = (view) => {
+    if (!authed) {
+      setPendingView(view)
+      setModalView('login')
+    } else {
+      setModalView(view)
+    }
+  }
+
+  const handleAuthed = (u) => {
+    setAuthed(true)
+    setUsername(u)
+    setModalView(pendingView || 'upload')
+    setPendingView(null)
+  }
+
+  const closeModal = () => setModalView(null)
+
   return (
-    <div className="relative min-h-screen w-full">
-      <div className="pointer-events-none fixed inset-0 -z-10">
-        <SceneBackground />
+    <main className="relative min-h-screen w-full bg-black overflow-hidden text-white font-sans">
+      {/* Finance Data Network 3D Background */}
+      <div className="absolute inset-0 z-0">
+        <FinanceBackground />
       </div>
-      <div className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
-        <motion.div
-          className="absolute -left-40 top-20 h-[380px] w-[380px] rounded-full bg-cyan-400/10 blur-3xl"
-          animate={{ x: [0, 90, -40, 0], y: [0, -30, 40, 0], scale: [1, 1.08, 0.95, 1] }}
-          transition={{ duration: 22, repeat: Infinity, ease: 'easeInOut' }}
-        />
-        <motion.div
-          className="absolute right-[-120px] top-[24%] h-[420px] w-[420px] rounded-full bg-violet-500/12 blur-3xl"
-          animate={{ x: [0, -100, 35, 0], y: [0, 55, -25, 0], scale: [1, 0.94, 1.06, 1] }}
-          transition={{ duration: 26, repeat: Infinity, ease: 'easeInOut' }}
-        />
-        <motion.div
-          className="absolute bottom-[-120px] left-[22%] h-[360px] w-[360px] rounded-full bg-emerald-400/10 blur-3xl"
-          animate={{ x: [0, 40, -70, 0], y: [0, -60, 20, 0], scale: [1, 1.05, 0.93, 1] }}
-          transition={{ duration: 24, repeat: Infinity, ease: 'easeInOut' }}
-        />
-      </div>
-      <div className="pointer-events-none fixed inset-0 z-[1] scanlines opacity-100" />
 
-      <Navbar username={username} authed={authed} onLogout={onLogout} />
+      {/* Main Content Layout */}
+      <div className="relative z-10 flex flex-row min-h-screen w-full">
+        
+        {/* Left Panel (52%) */}
+        <div className="relative w-full lg:w-[52%] h-screen p-4 lg:p-6 flex flex-col">
+          <div className="liquid-glass-strong absolute inset-4 lg:inset-6 rounded-3xl -z-10"></div>
+          
+          {/* Nav */}
+          <nav className="flex justify-between items-center w-full px-4 pt-4">
+            <div className="flex items-center gap-3">
+              <img 
+                src="/logo.png" 
+                alt="Nexus Logo" 
+                className="w-8 h-8 object-contain"
+                onError={(e) => { e.currentTarget.src = "https://placehold.co/32x32/111/FFF?text=N" }}
+              />
+              <span className="font-semibold text-2xl tracking-widest uppercase">NEXUS</span>
+            </div>
+            <button className="liquid-glass px-4 py-2 rounded-full flex items-center gap-2 hover:scale-105 transition-transform">
+              <span className="text-sm font-medium">Menu</span>
+              <Menu size={16} />
+            </button>
+          </nav>
 
-      <AnimatePresence mode="wait">
-        {!authed ? (
-          <motion.div key="login" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-            <LoginCard
-              onAuthed={(u) => {
-                setAuthed(true)
-                setUsername(u)
-              }}
+          {/* Hero Center */}
+          <div className="flex-1 flex flex-col items-center justify-center text-center px-6">
+            <img 
+              src="/logo.png" 
+              alt="Nexus Logo Large" 
+              className="w-20 h-20 object-contain mb-8"
+              onError={(e) => { e.currentTarget.src = "https://placehold.co/80x80/111/FFF?text=N" }}
             />
-          </motion.div>
-        ) : (
-          <motion.div key="upload" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-            <UploadPage username={username} onLogout={onLogout} />
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </div>
+            <h1 className="text-6xl lg:text-7xl font-medium tracking-[-0.04em] leading-tight mb-10 max-w-2xl">
+              Next-Generation <br />
+              <span className="text-white/70 italic tracking-tight">SAR Intelligence</span>
+            </h1>
+            
+
+
+            <div className="flex flex-wrap justify-center gap-3">
+              <span className="liquid-glass px-5 py-2 rounded-full text-xs text-white/80 font-mono">Global Graph</span>
+              <span className="liquid-glass px-5 py-2 rounded-full text-xs text-white/80 font-mono">Agent Swarm</span>
+              <span className="liquid-glass px-5 py-2 rounded-full text-xs text-white/80 font-mono">Risk Assessment</span>
+            </div>
+          </div>
+
+          {/* Bottom Quote */}
+          <div className="mt-auto px-6 pb-6 text-center lg:text-left">
+            <div className="text-[11px] tracking-[0.2em] uppercase text-white/40 mb-3 font-semibold">FINANCIAL SURVEILLANCE</div>
+            <div className="text-lg mb-4 text-white/90 font-light">
+              "Continuous monitoring of <span className="text-white font-medium italic">high-risk networks</span>."
+            </div>
+            <div className="flex items-center justify-center lg:justify-start gap-3 text-[10px] text-white/50 uppercase tracking-widest font-semibold">
+              <div className="w-8 h-[1px] bg-white/20"></div>
+              MULTI-AGENT PIPELINE
+              <div className="w-8 h-[1px] bg-white/20"></div>
+            </div>
+          </div>
+        </div>
+
+        {/* Right Panel (48%) - Desktop Only */}
+        <div className="hidden lg:flex w-[48%] h-screen p-6 flex-col relative">
+          
+          {/* Top Bar */}
+          <div className="flex justify-between items-center w-full mb-12">
+            <div className="liquid-glass rounded-full flex items-center px-2 py-2 gap-2">
+              <a href="#" className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center hover:text-white/80 transition-colors">
+                <Twitter size={14} />
+              </a>
+              <a href="#" className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center hover:text-white/80 transition-colors">
+                <Linkedin size={14} />
+              </a>
+              <a href="#" className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center hover:text-white/80 transition-colors">
+                <Instagram size={14} />
+              </a>
+              <button className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center hover:text-white/80 transition-colors ml-2">
+                <ArrowRight size={14} />
+              </button>
+            </div>
+
+            <button onClick={() => handleOpenView(authed ? 'upload' : 'login')} className="liquid-glass px-4 py-2 rounded-full flex items-center gap-2 hover:scale-105 transition-transform">
+              <Sparkles size={16} />
+              <span className="text-sm font-medium font-mono">{authed ? username : 'Login'}</span>
+            </button>
+          </div>
+
+          {/* Architecture Card */}
+          <div className="liquid-glass w-64 rounded-3xl p-6 ml-auto mr-12 hover:scale-[1.02] transition-transform">
+            <h3 className="font-semibold text-sm tracking-wide mb-2 uppercase text-white/90">Architecture</h3>
+            <p className="text-xs text-white/60 leading-relaxed">
+              Powered by a dynamic graph of 7 autonomous AI agents executing KYC, transaction profiling, and FinCEN reporting.
+            </p>
+          </div>
+
+          {/* Bottom Feature Section */}
+          <div className="liquid-glass mt-auto rounded-[2.5rem] p-4 flex flex-col gap-4">
+            <div className="flex gap-4">
+              <div className="liquid-glass flex-1 rounded-3xl p-6 hover:scale-105 transition-transform cursor-pointer" onClick={() => handleOpenView('pattern')}>
+                <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center mb-4 text-white/80">
+                  <Activity size={18} />
+                </div>
+                <h4 className="font-semibold text-sm tracking-wide mb-1">Pattern Recognition</h4>
+                <p className="text-xs text-white/50">Behavioral synthesis</p>
+              </div>
+              <div className="liquid-glass flex-1 rounded-3xl p-6 hover:scale-105 transition-transform cursor-pointer" onClick={() => handleOpenView('graph')}>
+                <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center mb-4 text-white/80">
+                  <ShieldAlert size={18} />
+                </div>
+                <h4 className="font-semibold text-sm tracking-wide mb-1">Knowledge Graph</h4>
+                <p className="text-xs text-white/50">Immutable ledgers</p>
+              </div>
+            </div>
+
+            <div className="liquid-glass rounded-3xl p-5 flex items-center gap-5 hover:scale-[1.02] transition-transform cursor-pointer" onClick={() => handleOpenView('upload')}>
+              <div className="w-20 h-16 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center">
+                 <FileText className="text-white/40" size={24} />
+              </div>
+              <div className="flex-1">
+                <h4 className="font-semibold text-sm tracking-wide mb-1">Automated Reporting</h4>
+                <p className="text-xs text-white/50">FinCEN-compliant drafting</p>
+              </div>
+              <button className="liquid-glass w-10 h-10 rounded-full flex items-center justify-center mr-2">
+                <Plus size={16} />
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Modal Overlay */}
+      {modalView && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 md:p-12">
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-md" onClick={closeModal}></div>
+          <div className="liquid-glass-strong w-full max-w-3xl max-h-[90vh] overflow-y-auto rounded-[2.5rem] relative z-10 p-8 md:p-12 custom-scrollbar">
+            <button 
+              onClick={closeModal}
+              className="absolute top-6 right-6 w-10 h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-white/20 transition-colors z-50"
+            >
+              <X size={20} />
+            </button>
+            
+            <AnimatePresence mode="wait">
+              {modalView === 'login' && (
+                <motion.div key="login" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+                  <LoginCard onAuthed={handleAuthed} />
+                </motion.div>
+              )}
+              {modalView === 'upload' && (
+                <motion.div key="upload" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+                  <UploadPage 
+                    username={username} 
+                    onLogout={onLogout} 
+                    analysisResult={analysisResult} 
+                    setAnalysisResult={setAnalysisResult} 
+                    parsedSections={parsedSections} 
+                  />
+                </motion.div>
+              )}
+              {modalView === 'pattern' && (
+                <motion.div key="pattern" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+                  <PatternRecognitionView parsedSections={parsedSections} />
+                </motion.div>
+              )}
+              {modalView === 'graph' && (
+                <motion.div key="graph" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+                  <KnowledgeGraphView parsedSections={parsedSections} />
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+        </div>
+      )}
+    </main>
   )
 }
 
@@ -698,4 +745,3 @@ export default function Portal() {
     </ToastProvider>
   )
 }
-
