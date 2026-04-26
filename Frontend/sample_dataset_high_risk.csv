@@ -1,0 +1,15 @@
+transaction_id,timestamp,subject_account,counterparty_account,amount,currency,origin_country,destination_country,channel,merchant_category,device_id,ip_address,risk_score,notes
+HR-400001,2026-04-23T08:02:00Z,ACC-9044,ACC-9901,9950,USD,IN,AE,wire,advisory,DVC-HR77,191.88.12.54,72,Near-threshold transfer start
+HR-400002,2026-04-23T08:19:00Z,ACC-9044,ACC-9901,9980,USD,IN,AE,wire,advisory,DVC-HR77,191.88.12.54,74,Repeated near-threshold transfer
+HR-400003,2026-04-23T08:36:00Z,ACC-9044,ACC-9901,9990,USD,IN,AE,wire,advisory,DVC-HR77,191.88.12.54,75,Structured transfer sequence
+HR-400004,2026-04-23T09:05:00Z,ACC-9044,ACC-9902,180000,USD,IN,HK,wire,investment_services,DVC-HR88,203.11.144.7,93,Large transfer to high-risk destination
+HR-400005,2026-04-23T09:12:00Z,ACC-9044,ACC-9902,176500,USD,IN,HK,wire,investment_services,DVC-HR88,203.11.144.7,94,Rapid repeated transfer
+HR-400006,2026-04-23T09:20:00Z,ACC-9044,ACC-9902,182000,USD,IN,HK,wire,investment_services,DVC-HR88,203.11.144.7,95,Potential layering sequence
+HR-400007,2026-04-23T10:01:00Z,ACC-9044,ACC-9903,340000,USD,IN,CH,wire,private_banking,DVC-HR99,10.44.18.120,98,Very high-value secrecy-jurisdiction transfer
+HR-400008,2026-04-23T10:09:00Z,ACC-9044,ACC-9903,335000,USD,IN,CH,wire,private_banking,DVC-HR99,10.44.18.120,99,Burst transfer behavior
+HR-400009,2026-04-23T10:16:00Z,ACC-9044,ACC-9903,332500,USD,IN,CH,wire,private_banking,DVC-HR99,10.44.18.120,99,Possible layering and placement
+HR-400010,2026-04-23T11:42:00Z,ACC-9044,ACC-9904,156000,USD,IN,TR,wire,real_estate,DVC-HR88,203.11.144.7,90,High-risk corridor transfer
+HR-400011,2026-04-23T11:51:00Z,ACC-9044,ACC-9904,159500,USD,IN,TR,wire,real_estate,DVC-HR88,203.11.144.7,91,Immediate repeated transfer
+HR-400012,2026-04-23T12:00:00Z,ACC-9044,ACC-9904,161000,USD,IN,TR,wire,real_estate,DVC-HR88,203.11.144.7,92,Escalating suspicious pattern
+HR-400013,2026-04-23T14:05:00Z,ACC-9044,ACC-9905,2500,USD,IN,IN,upi,retail,DVC-HR77,191.88.12.54,17,Normal domestic payment mixed in pattern
+HR-400014,2026-04-23T15:17:00Z,ACC-9044,ACC-9906,220000,USD,IN,AE,wire,digital_assets,DVC-HR88,203.11.144.7,94,Large outbound to exchange-linked recipient

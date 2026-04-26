@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import SceneBackground from '../components/SceneBackground.jsx'
-import PortalCursor from '../components/PortalCursor.jsx'
 import { ToastProvider, useToasts } from '../components/PortalToasts.jsx'
 import { analyzeCsv, getAnyToken, login, me, setSessionToken, setToken } from '../lib/api.js'
 import {
@@ -17,34 +16,9 @@ import {
   X,
 } from 'lucide-react'
 
-function useParallax() {
-  const ref = useRef(null)
-  useEffect(() => {
-    const root = ref.current
-    if (!root) return
-    const layers = Array.from(root.querySelectorAll('[data-depth]'))
-
-    const onMove = (e) => {
-      const cx = window.innerWidth / 2
-      const cy = window.innerHeight / 2
-      const dx = e.clientX - cx
-      const dy = e.clientY - cy
-      for (const el of layers) {
-        const d = Number(el.getAttribute('data-depth') || '0') || 0
-        el.style.transform = `translate3d(${dx * d}px, ${dy * d}px, 0)`
-      }
-    }
-
-    window.addEventListener('mousemove', onMove, { passive: true })
-    return () => window.removeEventListener('mousemove', onMove)
-  }, [])
-  return ref
-}
-
 function Navbar({ username, authed, onLogout }) {
   return (
     <nav
-      data-depth="0.02"
       className="portal-hover fixed left-0 top-0 z-[100] w-full border-b border-white/10 bg-black/40 px-4 py-4 backdrop-blur-xl md:px-8"
     >
       <div className="mx-auto flex max-w-[1180px] items-center justify-between">
@@ -134,7 +108,6 @@ function LoginCard({ onAuthed }) {
   return (
     <div className="flex min-h-screen w-full items-center justify-center px-5 py-10">
       <motion.div
-        data-depth="0.05"
         initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
@@ -366,7 +339,7 @@ function UploadPage({ username, onLogout }) {
 
   return (
     <div className="w-full px-5 pb-12 pt-[100px]">
-      <div data-depth="0.03" className="mx-auto w-full max-w-[980px]">
+      <div className="mx-auto w-full max-w-[980px]">
         <div className="mb-10">
           <div className="font-mono text-[11px] uppercase tracking-[0.18em] text-portal-accent">Dataset Upload</div>
           <div className="mt-3 text-4xl font-bold tracking-[-1px] text-portal-fg">Upload SAR Data</div>
@@ -375,7 +348,7 @@ function UploadPage({ username, onLogout }) {
           </div>
         </div>
 
-        <div data-depth="0.05" className="portal-card overflow-hidden p-0">
+        <div className="portal-card overflow-hidden p-0">
           <DropZone onFiles={addFiles} disabled={busy} />
         </div>
 
@@ -470,7 +443,7 @@ function DropZone({ onFiles, disabled }) {
 
   return (
     <div
-      className={`portal-hover relative cursor-none rounded-2xl border-2 border-dashed px-10 py-16 text-center transition ${
+      className={`portal-hover relative cursor-pointer rounded-2xl border-2 border-dashed px-10 py-16 text-center transition ${
         drag ? 'border-portal-accent bg-portal-accent/5 shadow-[0_0_40px_rgba(0,255,136,0.06)]' : 'border-white/15 bg-white/[0.03]'
       }`}
       onClick={() => inputRef.current?.click()}
@@ -548,7 +521,6 @@ function DropZone({ onFiles, disabled }) {
 }
 
 function PortalInner() {
-  const parallaxRef = useParallax()
   const [authed, setAuthed] = useState(() => Boolean(getAnyToken()))
   const [username, setUsername] = useState('')
 
@@ -571,10 +543,26 @@ function PortalInner() {
   }
 
   return (
-    <div ref={parallaxRef} className="relative min-h-screen w-full">
-      <PortalCursor />
+    <div className="relative min-h-screen w-full">
       <div className="pointer-events-none fixed inset-0 -z-10">
         <SceneBackground />
+      </div>
+      <div className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
+        <motion.div
+          className="absolute -left-40 top-20 h-[380px] w-[380px] rounded-full bg-cyan-400/10 blur-3xl"
+          animate={{ x: [0, 90, -40, 0], y: [0, -30, 40, 0], scale: [1, 1.08, 0.95, 1] }}
+          transition={{ duration: 22, repeat: Infinity, ease: 'easeInOut' }}
+        />
+        <motion.div
+          className="absolute right-[-120px] top-[24%] h-[420px] w-[420px] rounded-full bg-violet-500/12 blur-3xl"
+          animate={{ x: [0, -100, 35, 0], y: [0, 55, -25, 0], scale: [1, 0.94, 1.06, 1] }}
+          transition={{ duration: 26, repeat: Infinity, ease: 'easeInOut' }}
+        />
+        <motion.div
+          className="absolute bottom-[-120px] left-[22%] h-[360px] w-[360px] rounded-full bg-emerald-400/10 blur-3xl"
+          animate={{ x: [0, 40, -70, 0], y: [0, -60, 20, 0], scale: [1, 1.05, 0.93, 1] }}
+          transition={{ duration: 24, repeat: Infinity, ease: 'easeInOut' }}
+        />
       </div>
       <div className="pointer-events-none fixed inset-0 z-[1] scanlines opacity-100" />
 

@@ -1,0 +1,11 @@
+transaction_id,timestamp,subject_account,counterparty_account,amount,currency,origin_country,destination_country,channel,merchant_category,device_id,ip_address,risk_score,notes
+LR-200001,2026-04-21T08:10:00Z,ACC-1001,ACC-5101,1200,USD,IN,IN,upi,grocery,DVC-LR01,115.97.11.22,12,Routine grocery payment
+LR-200002,2026-04-21T09:02:00Z,ACC-1001,ACC-5102,1800,USD,IN,IN,card,utilities,DVC-LR01,115.97.11.22,14,Monthly utility bill
+LR-200003,2026-04-21T10:15:00Z,ACC-1001,ACC-5103,950,USD,IN,IN,upi,transport,DVC-LR01,115.97.11.22,10,Local commute spend
+LR-200004,2026-04-21T12:40:00Z,ACC-1001,ACC-5104,2400,USD,IN,IN,card,healthcare,DVC-LR01,115.97.11.22,16,Pharmacy and clinic
+LR-200005,2026-04-21T14:20:00Z,ACC-1001,ACC-5105,1300,USD,IN,IN,upi,restaurant,DVC-LR01,115.97.11.22,15,Dining expense
+LR-200006,2026-04-21T16:05:00Z,ACC-1001,ACC-5106,2100,USD,IN,IN,card,education,DVC-LR01,115.97.11.22,18,Course subscription
+LR-200007,2026-04-21T18:00:00Z,ACC-1001,ACC-5107,1700,USD,IN,IN,upi,retail,DVC-LR01,115.97.11.22,13,Retail purchase
+LR-200008,2026-04-21T20:12:00Z,ACC-1001,ACC-5108,2600,USD,IN,IN,card,insurance,DVC-LR01,115.97.11.22,20,Insurance premium
+LR-200009,2026-04-22T08:25:00Z,ACC-1001,ACC-5109,1500,USD,IN,IN,upi,grocery,DVC-LR01,115.97.11.22,12,Daily household spend
+LR-200010,2026-04-22T11:50:00Z,ACC-1001,ACC-5110,2900,USD,IN,IN,card,electronics,DVC-LR01,115.97.11.22,22,Single electronics purchase

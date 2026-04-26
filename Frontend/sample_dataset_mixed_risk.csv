@@ -1,0 +1,13 @@
+transaction_id,timestamp,subject_account,counterparty_account,amount,currency,origin_country,destination_country,channel,merchant_category,device_id,ip_address,risk_score,notes
+MX-300001,2026-04-22T07:55:00Z,ACC-2204,ACC-7801,4200,USD,IN,IN,upi,grocery,DVC-MX01,106.44.91.31,22,Baseline domestic payment
+MX-300002,2026-04-22T09:10:00Z,ACC-2204,ACC-7802,9800,USD,IN,AE,wire,consulting,DVC-MX01,106.44.91.31,58,Near-threshold cross-border
+MX-300003,2026-04-22T09:42:00Z,ACC-2204,ACC-7802,9900,USD,IN,AE,wire,consulting,DVC-MX01,106.44.91.31,64,Repeated near-threshold transfer
+MX-300004,2026-04-22T10:05:00Z,ACC-2204,ACC-7803,10400,USD,IN,AE,wire,consulting,DVC-MX01,106.44.91.31,66,Structuring adjacency
+MX-300005,2026-04-22T11:22:00Z,ACC-2204,ACC-7804,67000,USD,IN,SG,wire,digital_assets,DVC-MX02,89.12.210.4,79,Large transfer to exchange-linked account
+MX-300006,2026-04-22T12:03:00Z,ACC-2204,ACC-7805,2600,USD,IN,IN,card,utilities,DVC-MX01,106.44.91.31,18,Utility payment
+MX-300007,2026-04-22T12:48:00Z,ACC-2204,ACC-7806,72000,USD,IN,HK,wire,investment_services,DVC-MX02,89.12.210.4,84,Unexpected high-value corridor
+MX-300008,2026-04-22T13:10:00Z,ACC-2204,ACC-7806,71500,USD,IN,HK,wire,investment_services,DVC-MX02,89.12.210.4,86,Rapid repeat transfer
+MX-300009,2026-04-22T15:35:00Z,ACC-2204,ACC-7807,3500,USD,IN,IN,upi,transport,DVC-MX01,106.44.91.31,16,Domestic transit spend
+MX-300010,2026-04-22T17:05:00Z,ACC-2204,ACC-7808,54000,USD,IN,TR,wire,advisory,DVC-MX03,172.55.18.90,74,High-risk corridor with elevated amount
+MX-300011,2026-04-22T17:22:00Z,ACC-2204,ACC-7808,56000,USD,IN,TR,wire,advisory,DVC-MX03,172.55.18.90,77,Repeated high-risk corridor transfer
+MX-300012,2026-04-22T20:18:00Z,ACC-2204,ACC-7809,1900,USD,IN,IN,card,restaurant,DVC-MX01,106.44.91.31,13,Routine payment
