@@ -1,4 +1,4 @@
-"""Pipeline Step 2: detect suspicious transaction patterns."""
+"""Pipeline Step 2: detect suspicious transaction patterns with RAG-enhanced guidance."""
 
 from __future__ import annotations
 
@@ -7,6 +7,7 @@ from datetime import datetime
 from typing import Dict
 
 from app.agents.base import BaseAgent
+from app.utils.rag import retrieve_aml_context
 
 
 class PreprocessingAgent(BaseAgent):
@@ -59,10 +60,18 @@ class PreprocessingAgent(BaseAgent):
                 ):
                     flags.append(_flag(second, "round_tripping", "Funds returned between the same parties"))
 
+        # Retrieve AML guidance for detected typologies via RAG
+        typologies = sorted({flag["typology"] for flag in flags})
+        rag_context = []
+        if typologies:
+            query = " ".join(["AML suspicious activity"] + typologies)
+            rag_context = retrieve_aml_context(query=query, tags=typologies, top_k=5)
+
         data["analysis"] = {
             "flags": _dedupe_flags(flags),
-            "typologies": sorted({flag["typology"] for flag in flags}),
+            "typologies": typologies,
             "period": _period(transactions),
+            "rag_context": rag_context,
         }
         return data
 

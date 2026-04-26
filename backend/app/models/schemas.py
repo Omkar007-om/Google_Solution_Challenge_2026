@@ -64,6 +64,17 @@ class PipelineMetadata(BaseModel):
     cached: bool = False
 
 
+class AuditEntry(BaseModel):
+    """Glass-box audit trail entry mapping claims to evidence."""
+
+    step: str
+    agent: str
+    timestamp: str
+    action: str
+    evidence: list[str]
+    shap_values: dict[str, Any] | None = None
+
+
 class AnalyzeResponse(BaseModel):
     """Structured response returned by the ``/analyze`` endpoint."""
 
@@ -73,6 +84,10 @@ class AnalyzeResponse(BaseModel):
         description="Final SAR output produced by the pipeline.",
     )
     metadata: PipelineMetadata
+    audit_log: list[AuditEntry] = Field(
+        default=[],
+        description="Glass-box audit trail: step, action, evidence, SHAP values.",
+    )
 
 
 class ErrorResponse(BaseModel):

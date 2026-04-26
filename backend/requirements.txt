@@ -17,5 +17,8 @@ numpy>=2.0.0
 shap>=0.46.0
 python-jose[cryptography]>=3.4.0
 
+# Database
+asyncpg>=0.30.0
+
 # Dev
 rich>=14.0.0

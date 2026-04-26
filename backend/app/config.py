@@ -53,6 +53,20 @@ class Settings(BaseSettings):
     auth_demo_username: str = "admin"
     auth_demo_password: str = "admin"
 
+    # ── Database ───────────────────────────────────────────
+    database_url: str = "postgresql://postgres:postgres@localhost:5432/nexus"
+    database_pool_min: int = 1
+    database_pool_max: int = 10
+
+    # ── LLM API (Layer 3: Narrative Engine) ────────────────
+    llm_api_key: str = ""
+    llm_api_base: str = "https://api.openai.com/v1"
+    llm_model: str = "gpt-4"
+    llm_temperature: float = 0.3
+    llm_max_tokens: int = 2000
+    llm_timeout_seconds: int = 60
+    llm_enabled: bool = False
+
     @field_validator("debug", mode="before")
     @classmethod
     def parse_debug(cls, value):
