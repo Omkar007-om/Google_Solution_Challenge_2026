@@ -1,0 +1,25 @@
+transaction_id,timestamp,subject_account,counterparty_account,amount,currency,origin_country,destination_country,channel,merchant_category,device_id,ip_address,risk_score,notes
+TXN-100001,2026-04-24T08:12:10Z,ACC-0042,ACC-7781,9800,USD,IN,AE,wire,consulting,DVC-9A11,103.24.10.41,48,Single outbound transfer
+TXN-100002,2026-04-24T08:44:22Z,ACC-0042,ACC-7781,9900,USD,IN,AE,wire,consulting,DVC-9A11,103.24.10.41,63,Repeated near-threshold transfer
+TXN-100003,2026-04-24T09:10:03Z,ACC-0042,ACC-8120,9950,USD,IN,AE,wire,consulting,DVC-9A11,103.24.10.41,67,Structuring pattern suspected
+TXN-100004,2026-04-24T09:39:55Z,ACC-0042,ACC-8120,9850,USD,IN,AE,wire,consulting,DVC-9A11,103.24.10.41,69,Multiple rapid transfers
+TXN-100005,2026-04-24T10:05:37Z,ACC-0042,ACC-9931,120000,USD,IN,SG,wire,digital_assets,DVC-AB12,45.13.222.8,88,Large transfer to exchange-linked account
+TXN-100006,2026-04-24T10:18:49Z,ACC-0042,ACC-9931,118500,USD,IN,SG,wire,digital_assets,DVC-AB12,45.13.222.8,86,Back-to-back high-value transfer
+TXN-100007,2026-04-24T11:02:12Z,ACC-0042,ACC-4412,4200,USD,IN,IN,card,electronics,DVC-9A11,103.24.10.41,22,Low-risk consumer payment
+TXN-100008,2026-04-24T11:31:04Z,ACC-0042,ACC-5510,3700,USD,IN,IN,upi,grocery,DVC-9A11,103.24.10.41,18,Routine domestic spend
+TXN-100009,2026-04-24T12:14:28Z,ACC-0042,ACC-6675,260000,USD,IN,HK,wire,investment_services,DVC-FF80,198.44.210.92,95,Unusual high-value corridor
+TXN-100010,2026-04-24T12:20:41Z,ACC-0042,ACC-6675,255000,USD,IN,HK,wire,investment_services,DVC-FF80,198.44.210.92,96,Repeated large transaction
+TXN-100011,2026-04-24T12:27:03Z,ACC-0042,ACC-6675,249500,USD,IN,HK,wire,investment_services,DVC-FF80,198.44.210.92,94,Potential layering behavior
+TXN-100012,2026-04-24T13:05:16Z,ACC-0042,ACC-1201,8500,USD,IN,GB,wire,software_services,DVC-AE21,91.204.77.33,52,Cross-border vendor payment
+TXN-100013,2026-04-24T13:41:58Z,ACC-0042,ACC-1201,8600,USD,IN,GB,wire,software_services,DVC-AE21,91.204.77.33,56,Recurring vendor amount with small variance
+TXN-100014,2026-04-24T14:09:45Z,ACC-0042,ACC-8840,9990,USD,IN,TR,wire,advisory,DVC-AB12,45.13.222.8,71,Near-threshold to new corridor
+TXN-100015,2026-04-24T14:25:30Z,ACC-0042,ACC-8840,9980,USD,IN,TR,wire,advisory,DVC-AB12,45.13.222.8,73,Structuring continuation
+TXN-100016,2026-04-24T14:42:07Z,ACC-0042,ACC-8840,9975,USD,IN,TR,wire,advisory,DVC-AB12,45.13.222.8,74,Clustered threshold-adjacent transfers
+TXN-100017,2026-04-24T15:21:13Z,ACC-0042,ACC-3102,5400,USD,IN,IN,atm,cash_withdrawal,DVC-9A11,103.24.10.41,31,Domestic cash usage
+TXN-100018,2026-04-24T15:57:59Z,ACC-0042,ACC-7717,178000,USD,IN,AE,wire,real_estate,DVC-FF80,198.44.210.92,90,Large payment inconsistent with profile
+TXN-100019,2026-04-24T16:08:36Z,ACC-0042,ACC-7717,181500,USD,IN,AE,wire,real_estate,DVC-FF80,198.44.210.92,92,Rapid repeat to same beneficiary
+TXN-100020,2026-04-24T16:19:11Z,ACC-0042,ACC-7717,176400,USD,IN,AE,wire,real_estate,DVC-FF80,198.44.210.92,91,Potential round-tripping chain
+TXN-100021,2026-04-24T16:45:22Z,ACC-0042,ACC-4501,2200,USD,IN,IN,upi,utilities,DVC-9A11,103.24.10.41,16,Baseline domestic payment
+TXN-100022,2026-04-24T17:12:09Z,ACC-0042,ACC-5523,340000,USD,IN,CH,wire,private_banking,DVC-3C90,172.31.8.14,97,Very high-value transfer to secrecy jurisdiction
+TXN-100023,2026-04-24T17:18:44Z,ACC-0042,ACC-5523,335000,USD,IN,CH,wire,private_banking,DVC-3C90,172.31.8.14,98,Burst transfer pattern
+TXN-100024,2026-04-24T17:25:30Z,ACC-0042,ACC-5523,332000,USD,IN,CH,wire,private_banking,DVC-3C90,172.31.8.14,99,Potential laundering stage layering

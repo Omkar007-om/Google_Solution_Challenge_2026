@@ -1,0 +1,51 @@
+[
+  {
+    "id": "AML-TYPOLOGY-STRUCTURING-001",
+    "title": "Structuring or smurfing",
+    "category": "AML typology",
+    "tags": ["structuring_smurfing", "smurfing", "near threshold", "repeated transactions"],
+    "content": "Structuring, also called smurfing, involves splitting funds into multiple smaller transactions to avoid review thresholds or reporting triggers. Red flags include repeated transactions close to a threshold, rapid timing, shared originator accounts, and multiple beneficiaries."
+  },
+  {
+    "id": "AML-TYPOLOGY-LAYERING-001",
+    "title": "Layering through rapid movement",
+    "category": "AML typology",
+    "tags": ["layering", "rapid movement", "offshore_exposure", "round_tripping"],
+    "content": "Layering attempts to obscure the origin of funds by moving value through accounts, counterparties, products, or jurisdictions. Rapid onward transfers, offshore destinations, circular movement, and weak economic purpose can support a layering concern."
+  },
+  {
+    "id": "AML-TYPOLOGY-OFFSHORE-001",
+    "title": "Offshore or high-risk jurisdiction exposure",
+    "category": "AML typology",
+    "tags": ["offshore_exposure", "offshore", "high-risk location", "cross-border"],
+    "content": "Transactions involving offshore or high-risk jurisdictions can increase AML concern when paired with unusual value, rapid movement, missing purpose, shell-like counterparties, or activity inconsistent with the customer's known profile."
+  },
+  {
+    "id": "AML-TYPOLOGY-ROUND-TRIPPING-001",
+    "title": "Round-tripping funds",
+    "category": "AML typology",
+    "tags": ["round_tripping", "circular movement", "same parties", "return flow"],
+    "content": "Round-tripping occurs when funds move between related parties or accounts and return to the originator or a connected account. It may indicate an attempt to create artificial transaction history or disguise ownership/control."
+  },
+  {
+    "id": "AML-QUALITY-PURPOSE-001",
+    "title": "Missing or weak transaction purpose",
+    "category": "Data quality and SAR drafting",
+    "tags": ["missing_purpose", "narrative", "purpose", "remarks"],
+    "content": "A SAR narrative should identify why the activity is unusual. Missing payment purpose, vague remarks, or unsupported business rationale should be described as a transparency concern, especially when paired with high value or suspicious movement."
+  },
+  {
+    "id": "SAR-NARRATIVE-REQUIREMENTS-001",
+    "title": "SAR narrative essentials",
+    "category": "SAR drafting",
+    "tags": ["sar", "narrative", "who what when where why how", "compliance"],
+    "content": "A useful SAR narrative should describe who is involved, what happened, when it happened, where funds moved, why the activity is suspicious, and how the suspicious pattern was identified. It should separate observed facts from analyst inference."
+  },
+  {
+    "id": "SAR-EVIDENCE-QUALITY-001",
+    "title": "Evidence quality for escalation",
+    "category": "Compliance review",
+    "tags": ["evidence", "validation", "filing", "review"],
+    "content": "Before filing or escalation, the case should include transaction identifiers, dates or period, amounts, counterparties, locations, detected typologies, risk rationale, and a clear recommended action."
+  }
+]

@@ -2,19 +2,75 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
-import { ShieldAlert, ShieldCheck, Activity, BarChart3, Clock, CheckCircle2, XCircle, ArrowLeft } from 'lucide-react';
+import { ShieldAlert, ShieldCheck, Activity, BarChart3, Clock, CheckCircle2, XCircle, ArrowLeft, FileText, Split, BookOpen } from 'lucide-react';
 
 interface SARReportProps {
-  data: any;
+  data: Record<string, unknown>;
   onReset: () => void;
 }
 
+type TraceStep = {
+  agent: string;
+  status: string;
+  duration_s: number;
+};
+
+type SARResult = {
+  report_id?: string;
+  status?: string;
+  formatted_report?: string;
+  risk_assessment?: {
+    score?: number;
+    level?: string;
+    contributing_factors?: string[];
+    shap_explanation?: {
+      method?: string;
+      top_drivers?: ShapDriver[];
+    };
+  };
+  summary?: {
+    total_amount?: number;
+    total_transactions?: number;
+    avg_amount?: number;
+    high_value_count?: number;
+  };
+  review_decision?: {
+    decision?: string;
+    reviewer_note?: string;
+  };
+  rag_context?: RagSource[];
+};
+
+type ShapDriver = {
+  feature: string;
+  display_name: string;
+  shap_value: number;
+  impact_pct: number;
+  reason: string;
+};
+
+type RagSource = {
+  id: string;
+  title: string;
+  category: string;
+  content: string;
+};
+
+type SARMetadata = {
+  trace?: TraceStep[];
+  total_duration_s?: number;
+  cached?: boolean;
+};
+
 export default function SARReport({ data, onReset }: SARReportProps) {
-  const result = data.result || {};
-  const metadata = data.metadata || {};
+  const result = (data.result || {}) as SARResult;
+  const metadata = (data.metadata || {}) as SARMetadata;
   const risk = result.risk_assessment || {};
   const summary = result.summary || {};
   const trace = metadata.trace || [];
+  const review = result.review_decision || {};
+  const shapDrivers = risk.shap_explanation?.top_drivers || [];
+  const ragContext = result.rag_context || [];
 
   const isHighRisk = risk.score >= 60;
   const RiskIcon = isHighRisk ? ShieldAlert : ShieldCheck;
@@ -111,13 +167,13 @@ export default function SARReport({ data, onReset }: SARReportProps) {
                 {/* Connecting Line */}
                 <div className="absolute top-1/2 left-0 w-full h-0.5 bg-white/10 -z-10 -translate-y-1/2"></div>
                 
-                {trace.map((step: any, idx: number) => (
+                {trace.map((step, idx) => (
                   <motion.div 
                     key={idx}
                     initial={{ scale: 0.8, opacity: 0 }}
                     animate={{ scale: 1, opacity: 1 }}
                     transition={{ delay: 0.3 + (idx * 0.1) }}
-                    className="relative flex flex-col items-center group w-1/5"
+                    className="relative flex flex-col items-center group flex-1 min-w-24"
                   >
                     <div className={`w-10 h-10 rounded-full flex items-center justify-center border-2 mb-3 bg-black transition-transform group-hover:scale-110 ${step.status === 'success' ? 'border-brand-primary text-brand-primary shadow-[0_0_15px_rgba(99,102,241,0.5)]' : 'border-rose-500 text-rose-500'}`}>
                       {step.status === 'success' ? <CheckCircle2 size={20} /> : <XCircle size={20} />}
@@ -129,6 +185,69 @@ export default function SARReport({ data, onReset }: SARReportProps) {
               </div>
             </div>
           </div>
+        </motion.div>
+
+        {shapDrivers.length > 0 && (
+          <motion.div variants={itemVariants} className="glass-panel p-6 rounded-2xl md:col-span-3">
+            <div className="flex items-center gap-2 mb-5 text-brand-accent">
+              <Split size={20} />
+              <h3 className="font-semibold text-white">SHAP Explainability</h3>
+            </div>
+            <div className="space-y-3">
+              {shapDrivers.map((driver) => (
+                <div key={driver.feature} className="grid gap-2 rounded-lg border border-white/10 bg-black/30 p-4 md:grid-cols-[220px_1fr_90px] md:items-center">
+                  <div>
+                    <div className="text-sm font-semibold text-white">{driver.display_name}</div>
+                    <div className="text-xs text-gray-500">+{driver.shap_value} risk points</div>
+                  </div>
+                  <div className="h-2 rounded-full bg-white/10">
+                    <div
+                      className="h-2 rounded-full bg-brand-accent"
+                      style={{ width: `${Math.min(driver.impact_pct, 100)}%` }}
+                    />
+                  </div>
+                  <div className="text-right text-sm font-bold text-white">{driver.impact_pct}%</div>
+                  <p className="text-sm text-gray-400 md:col-span-3">{driver.reason}</p>
+                </div>
+              ))}
+            </div>
+          </motion.div>
+        )}
+
+        {ragContext.length > 0 && (
+          <motion.div variants={itemVariants} className="glass-panel p-6 rounded-2xl md:col-span-3">
+            <div className="flex items-center gap-2 mb-5 text-brand-accent">
+              <BookOpen size={20} />
+              <h3 className="font-semibold text-white">RAG Knowledge Retrieved</h3>
+            </div>
+            <div className="grid gap-3 md:grid-cols-2">
+              {ragContext.map((source) => (
+                <div key={source.id} className="rounded-lg border border-white/10 bg-black/30 p-4">
+                  <div className="text-xs text-gray-500">{source.category} | {source.id}</div>
+                  <div className="mt-1 text-sm font-semibold text-white">{source.title}</div>
+                  <p className="mt-2 text-sm leading-6 text-gray-400">{source.content}</p>
+                </div>
+              ))}
+            </div>
+          </motion.div>
+        )}
+
+        <motion.div variants={itemVariants} className="glass-panel p-6 rounded-2xl md:col-span-3">
+          <div className="flex items-center justify-between gap-4 mb-5">
+            <div className="flex items-center gap-2 text-brand-accent">
+              <FileText size={20} />
+              <h3 className="font-semibold text-white">Humanised SAR Report</h3>
+            </div>
+            <div className="text-xs text-gray-300 bg-white/5 border border-white/10 rounded-lg px-3 py-1.5">
+              {review.decision || result.status}
+            </div>
+          </div>
+          <pre className="whitespace-pre-wrap rounded-xl border border-white/10 bg-black/40 p-5 text-sm leading-6 text-gray-200 overflow-x-auto">
+            {result.formatted_report}
+          </pre>
+          {review.reviewer_note && (
+            <p className="mt-4 text-sm text-gray-400">{review.reviewer_note}</p>
+          )}
         </motion.div>
 
       </motion.div>

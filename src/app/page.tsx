@@ -5,21 +5,30 @@ import axios from "axios";
 import SARForm from "@/components/SARForm";
 import SARReport from "@/components/SARReport";
 import { ShieldAlert } from "lucide-react";
+import type { AxiosError } from "axios";
+
+type AnalyzePayload = FormData | Record<string, unknown>;
+type ApiErrorDetail = { detail?: { error?: string } };
 
 export default function Home() {
-  const [reportData, setReportData] = useState<any | null>(null);
+  const [reportData, setReportData] = useState<Record<string, unknown> | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleAnalyze = async (payload: any) => {
+  const handleAnalyze = async (payload: AnalyzePayload) => {
     setIsLoading(true);
     setReportData(null);
     try {
-      // Connect to the SAR Multi-Agent Backend running on port 8000
-      const response = await axios.post("http://localhost:8000/api/v1/analyze", payload);
+      const isCsvUpload = payload instanceof FormData;
+      const response = await axios.post(
+        isCsvUpload ? "http://localhost:8000/api/v1/analyze/csv" : "http://localhost:8000/api/v1/analyze",
+        payload,
+        isCsvUpload ? { headers: { "Content-Type": "multipart/form-data" } } : undefined
+      );
       setReportData(response.data);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Analysis failed:", error);
-      alert(error.response?.data?.detail?.error || error.message || "Failed to analyze data");
+      const axiosError = error as AxiosError<ApiErrorDetail>;
+      alert(axiosError.response?.data?.detail?.error || axiosError.message || "Failed to analyze data");
     } finally {
       setIsLoading(false);
     }

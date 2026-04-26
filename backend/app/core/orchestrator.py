@@ -28,6 +28,8 @@ from app.agents import (
     FeatureProcessingAgent,
     AnalysisEngineAgent,
     OutputFormatterAgent,
+    ComplianceOfficerAgent,
+    ReviewerAgent,
 )
 from app.agents.base import BaseAgent
 from app.core.exceptions import AgentError, PipelineError
@@ -45,6 +47,8 @@ AGENT_REGISTRY: list[BaseAgent] = [
     FeatureProcessingAgent(),
     AnalysisEngineAgent(),
     OutputFormatterAgent(),
+    ComplianceOfficerAgent(),
+    ReviewerAgent(),
 ]
 
 

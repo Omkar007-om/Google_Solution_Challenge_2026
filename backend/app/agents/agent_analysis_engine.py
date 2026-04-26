@@ -1,69 +1,54 @@
-"""
-SAR Multi-Agent Backend — Analysis Engine Agent
-=================================================
-Pipeline Step 4: Performs rule-based risk scoring.
-
-Evaluates statistical features and produces a risk assessment
-with score (0–100), level (LOW / MEDIUM / HIGH / CRITICAL),
-and contributing factors.
-"""
+"""Pipeline Step 4: explain the suspicious behavior in plain English."""
 
 from __future__ import annotations
 
-from typing import Dict, List
+from typing import Dict
 
 from app.agents.base import BaseAgent
+from app.utils.rag import retrieve_aml_context
 
 
 class AnalysisEngineAgent(BaseAgent):
-    """Score risk level based on extracted features."""
+    """Build investigation reasoning from detected flags."""
 
-    name = "AnalysisEngine"
+    name = "Investigator"
 
     async def process(self, data: Dict) -> Dict:
-        features = data.get("features", {})
+        flags = data.get("analysis", {}).get("flags", [])
+        risk = data.get("risk", {})
+        typologies = data.get("analysis", {}).get("typologies", [])
+        query = " ".join([
+            "AML SAR suspicious activity",
+            " ".join(typologies),
+            " ".join(flag.get("reason", "") for flag in flags),
+        ])
+        retrieved_context = retrieve_aml_context(query=query, tags=typologies, top_k=4)
 
-        risk_score = 0
-        factors: List[str] = []
-
-        # ── Rule-based scoring ───────────────────────────
-        if features.get("total_amount", 0) > 50_000:
-            risk_score += 30
-            factors.append("High cumulative transaction volume")
-
-        if features.get("high_value_count", 0) > 3:
-            risk_score += 25
-            factors.append("Multiple high-value transactions")
-
-        if features.get("avg_amount", 0) > 10_000:
-            risk_score += 20
-            factors.append("Elevated average transaction size")
-
-        if features.get("max_amount", 0) > 50_000:
-            risk_score += 15
-            factors.append("Single very-high-value transaction")
-
-        if features.get("total_transactions", 0) > 50:
-            risk_score += 10
-            factors.append("Large number of transactions")
-
-        # Cap at 100
-        risk_score = min(risk_score, 100)
-
-        # ── Determine risk level ─────────────────────────
-        if risk_score >= 80:
-            risk_level = "CRITICAL"
-        elif risk_score >= 60:
-            risk_level = "HIGH"
-        elif risk_score >= 30:
-            risk_level = "MEDIUM"
+        if flags:
+            primary = flags[0]
+            summary = (
+                f"The reviewed activity for {data.get('user_id')} shows {len(flags)} "
+                f"risk indicator(s), led by {primary['typology'].replace('_', ' ')}. "
+                f"The pattern is assessed as {risk.get('level', 'UNKNOWN')} risk."
+            )
         else:
-            risk_level = "LOW"
+            summary = (
+                f"The reviewed activity for {data.get('user_id')} does not show "
+                "material suspicious indicators under the configured rules."
+            )
 
-        data["analysis"] = {
-            "risk_score": risk_score,
-            "risk_level": risk_level,
-            "contributing_factors": factors,
+        data["reasoning"] = {
+            "summary": summary,
+            "key_observations": [
+                f"{flag['transaction_id']}: {flag['reason']} ({flag['location']}, amount {flag['amount']:,.2f})"
+                for flag in flags[:10]
+            ],
+            "rag_context": retrieved_context,
+            "grounded_rationale": [
+                f"{item['title']}: {item['content']}"
+                for item in retrieved_context[:3]
+            ],
+            "recommended_action": "File SAR" if risk.get("score", 0) >= 60 else "Review internally",
         }
 
         return data

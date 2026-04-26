@@ -9,6 +9,7 @@ See ``.env.example`` for the full list of supported variables.
 
 from functools import lru_cache
 
+from pydantic import field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -40,6 +41,28 @@ class Settings(BaseSettings):
 
     # ── Rate Limiting (requests per minute) ──────────────
     rate_limit_rpm: int = 60
+
+    # ── Auth / JWT ───────────────────────────────────────
+    jwt_secret: str = "change-me-in-production"
+    jwt_algorithm: str = "HS256"
+    jwt_issuer: str = "nexus-sar"
+    jwt_audience: str = "nexus-sar-ui"
+    jwt_access_token_exp_minutes: int = 60
+
+    # Demo credentials (replace with real identity provider)
+    auth_demo_username: str = "admin"
+    auth_demo_password: str = "admin"
+
+    @field_validator("debug", mode="before")
+    @classmethod
+    def parse_debug(cls, value):
+        if isinstance(value, str):
+            normalized = value.strip().lower()
+            if normalized in {"release", "prod", "production", "off", "false", "0", "no"}:
+                return False
+            if normalized in {"debug", "dev", "development", "on", "true", "1", "yes"}:
+                return True
+        return value
 
     model_config = SettingsConfigDict(
         env_file=".env",
