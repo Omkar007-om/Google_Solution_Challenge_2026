@@ -22,7 +22,6 @@
       linear-gradient(180deg, #06060c 0%, #05050b 50%, #06060c 100%);
     overflow-x: hidden;
     overflow-y: auto;
-    cursor: none;
   }
 }
 
@@ -57,6 +56,9 @@
   }
   .portal-accent-line {
     background: linear-gradient(90deg, transparent, rgba(0, 255, 136, 0.9), transparent);
+  }
+  .portal-hover {
+    @apply cursor-pointer transition-all duration-300;
   }
 }
 
