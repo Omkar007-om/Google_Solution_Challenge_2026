@@ -8,12 +8,11 @@ from __future__ import annotations
 
 from typing import Any
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, HTTPException, status
 from pydantic import BaseModel, Field
 
 from app.core.database import save_feedback, get_feedback_stats
 from app.core.logger import logger
-from app.core.security import get_current_user
 
 router = APIRouter(tags=["Feedback"])
 
@@ -63,7 +62,6 @@ class FeedbackStatsResponse(BaseModel):
 )
 async def submit_feedback(
     body: FeedbackRequest,
-    user: dict = Depends(get_current_user),
 ) -> FeedbackResponse:
     """Submit analyst feedback for a generated SAR.
     
@@ -78,7 +76,7 @@ async def submit_feedback(
     try:
         feedback_id = await save_feedback(
             case_id=body.case_id,
-            analyst_id=user.get("username", "unknown"),
+            analyst_id="public-analyst",
             original_sar=body.original_sar,
             edited_sar=body.edited_sar,
             outcome=body.outcome,
@@ -88,7 +86,7 @@ async def submit_feedback(
         logger.info(
             "Feedback submitted for case %s by analyst %s (outcome=%s)",
             body.case_id,
-            user.get("username"),
+            "public-analyst",
             body.outcome,
         )
         
@@ -120,7 +118,6 @@ async def submit_feedback(
 )
 async def feedback_stats(
     analyst_id: str | None = None,
-    user: dict = Depends(get_current_user),
 ) -> FeedbackStatsResponse:
     """Get feedback statistics.
     

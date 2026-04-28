@@ -4,52 +4,10 @@ function getApiBase() {
   return import.meta.env?.VITE_API_URL || DEFAULT_API
 }
 
-export function getToken() {
-  try {
-    return localStorage.getItem('nexus.jwt') || ''
-  } catch {
-    return ''
-  }
-}
-
-export function getSessionToken() {
-  try {
-    return sessionStorage.getItem('nexus.jwt') || ''
-  } catch {
-    return ''
-  }
-}
-
-export function getAnyToken() {
-  return getToken() || getSessionToken()
-}
-
-export function setToken(token) {
-  try {
-    if (token) localStorage.setItem('nexus.jwt', token)
-    else localStorage.removeItem('nexus.jwt')
-  } catch {
-    // ignore
-  }
-}
-
-export function setSessionToken(token) {
-  try {
-    if (token) sessionStorage.setItem('nexus.jwt', token)
-    else sessionStorage.removeItem('nexus.jwt')
-  } catch {
-    // ignore
-  }
-}
-
-async function request(path, { method = 'GET', headers, body, auth = true } = {}) {
+async function request(path, { method = 'GET', headers, body } = {}) {
   const base = getApiBase()
   const h = new Headers(headers || {})
   h.set('Accept', 'application/json')
-  if (auth) {
-    const t = getAnyToken()
-    if (t) h.set('Authorization', `Bearer ${t}`)
-  }
 
   let res
   try {
@@ -67,19 +25,6 @@ async function request(path, { method = 'GET', headers, body, auth = true } = {}
     throw err
   }
   return json
-}
-
-export async function login({ username, password }) {
-  return request('/api/v1/auth/login', {
-    method: 'POST',
-    auth: false,
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ username, password }),
-  })
-}
-
-export async function me() {
-  return request('/api/v1/auth/me', { method: 'GET' })
 }
 
 export async function analyzeCsv({ file, subjectAccount }) {

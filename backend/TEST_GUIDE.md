@@ -52,7 +52,6 @@ See manual test commands below.
 | Test | Layers Verified | What It Checks |
 |------|-----------------|----------------|
 | Health Check | Layer 0 | Server running |
-| Auth | Layer 0 | JWT token generation |
 | JSON Analyze | Layers 1-4 | Full pipeline with all agents |
 | CSV Upload | Layer 1 | File parsing |
 | Feedback | Layer 5 | RLHF data persistence |
@@ -62,17 +61,9 @@ See manual test commands below.
 
 ## Manual Test Commands
 
-### Get Token
-```bash
-curl -X POST http://localhost:8000/api/v1/auth/login \
-  -H "Content-Type: application/json" \
-  -d '{"username":"admin","password":"admin"}'
-```
-
 ### Test Analyze (JSON)
 ```bash
 curl -X POST http://localhost:8000/api/v1/analyze \
-  -H "Authorization: Bearer YOUR_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
     "input_data": {
@@ -87,7 +78,6 @@ curl -X POST http://localhost:8000/api/v1/analyze \
 ### Test CSV Upload
 ```bash
 curl -X POST http://localhost:8000/api/v1/analyze/csv \
-  -H "Authorization: Bearer YOUR_TOKEN" \
   -F "file=@test.csv" \
   -F "user_id=TEST-CSV"
 ```
@@ -95,7 +85,6 @@ curl -X POST http://localhost:8000/api/v1/analyze/csv \
 ### Test Feedback
 ```bash
 curl -X POST http://localhost:8000/api/v1/feedback \
-  -H "Authorization: Bearer YOUR_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
     "case_id": "SAR-TEST-001-20240101",
@@ -106,8 +95,7 @@ curl -X POST http://localhost:8000/api/v1/feedback \
 
 ### Check Feedback Stats
 ```bash
-curl http://localhost:8000/api/v1/feedback/stats \
-  -H "Authorization: Bearer YOUR_TOKEN"
+curl http://localhost:8000/api/v1/feedback/stats
 ```
 
 ---
@@ -117,9 +105,6 @@ curl http://localhost:8000/api/v1/feedback/stats \
 ```
 [INFO] Testing health endpoint...
 [PASS] Health check passed
-
-[INFO] Testing authentication...
-[PASS] Authentication passed
 
 [INFO] Testing /analyze endpoint (JSON)...
 [PASS]   ✓ success flag
@@ -167,7 +152,6 @@ Total Checks: 15
 | `Connection refused` | Start the server first |
 | `Module not found` | Run `pip install -r requirements.txt` |
 | Database errors | Start PostgreSQL or disable DB in `.env` |
-| Auth fails | Check username/password = `admin`/`admin` |
 | LLM timeout | Set `LLM_ENABLED=false` in `.env` |
 
 ---

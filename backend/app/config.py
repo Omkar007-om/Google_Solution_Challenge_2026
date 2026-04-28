@@ -42,17 +42,6 @@ class Settings(BaseSettings):
     # ── Rate Limiting (requests per minute) ──────────────
     rate_limit_rpm: int = 60
 
-    # ── Auth / JWT ───────────────────────────────────────
-    jwt_secret: str = "change-me-in-production"
-    jwt_algorithm: str = "HS256"
-    jwt_issuer: str = "nexus-sar"
-    jwt_audience: str = "nexus-sar-ui"
-    jwt_access_token_exp_minutes: int = 60
-
-    # Demo credentials (replace with real identity provider)
-    auth_demo_username: str = "admin"
-    auth_demo_password: str = "admin"
-
     # ── Database ───────────────────────────────────────────
     database_url: str = "postgresql://postgres:postgres@localhost:5432/nexus"
     database_pool_min: int = 1

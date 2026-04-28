@@ -50,7 +50,6 @@ class NexusTester:
     
     def __init__(self):
         self.client = httpx.AsyncClient(base_url=BASE_URL, timeout=TIMEOUT)
-        self.token: str | None = None
         self.case_id: str | None = None
         self.results: dict[str, Any] = {}
         self.passed = 0
@@ -84,37 +83,12 @@ class NexusTester:
             self.log(f"Health check error: {exc}", "FAIL")
             return False
     
-    async def test_auth(self) -> bool:
-        """Test Layer 0: Authentication"""
-        self.log("Testing authentication...", "INFO")
-        try:
-            response = await self.client.post(
-                "/api/v1/auth/login",
-                json={"username": "admin", "password": "admin"}
-            )
-            if response.status_code == 200:
-                data = response.json()
-                self.token = data.get("access_token")
-                if self.token:
-                    self.log("Authentication passed", "PASS")
-                    return True
-            self.log(f"Auth failed: {response.text}", "FAIL")
-            return False
-        except Exception as exc:
-            self.log(f"Auth error: {exc}", "FAIL")
-            return False
-    
     async def test_analyze_json(self) -> bool:
         """Test Layers 1-4: Full pipeline with JSON input"""
         self.log("Testing /analyze endpoint (JSON)...", "INFO")
-        if not self.token:
-            self.log("No auth token available", "FAIL")
-            return False
-        
         try:
             response = await self.client.post(
                 "/api/v1/analyze",
-                headers={"Authorization": f"Bearer {self.token}"},
                 json={
                     "input_data": {
                         "user_id": "ACCT-TEST-001",
@@ -193,10 +167,6 @@ class NexusTester:
     async def test_analyze_csv(self) -> bool:
         """Test Layer 1: CSV Upload"""
         self.log("Testing /analyze/csv endpoint...", "INFO")
-        if not self.token:
-            self.log("No auth token available", "FAIL")
-            return False
-        
         try:
             # Create temp CSV file
             csv_content = """transaction_id,timestamp,amount,currency,from_account,to_account,location,type,note
@@ -214,7 +184,6 @@ TXN-C004,2024-01-18 16:00:00,1200000,INR,ACCT-CSV-001,ACCT-OUT-999,Switzerland,s
                 with open(csv_path, 'rb') as f:
                     response = await self.client.post(
                         "/api/v1/analyze/csv",
-                        headers={"Authorization": f"Bearer {self.token}"},
                         data={"user_id": "ACCT-CSV-001", "currency": "INR"},
                         files={"file": ("test.csv", f, "text/csv")}
                     )
@@ -262,10 +231,6 @@ TXN-C004,2024-01-18 16:00:00,1200000,INR,ACCT-CSV-001,ACCT-OUT-999,Switzerland,s
     async def test_feedback(self) -> bool:
         """Test Layer 5: Human Control / RLHF"""
         self.log("Testing /feedback endpoint (Layer 5)...", "INFO")
-        if not self.token:
-            self.log("No auth token available", "FAIL")
-            return False
-        
         if not self.case_id:
             self.log("No case_id from previous test", "FAIL")
             return False
@@ -274,7 +239,6 @@ TXN-C004,2024-01-18 16:00:00,1200000,INR,ACCT-CSV-001,ACCT-OUT-999,Switzerland,s
             # Submit feedback
             response = await self.client.post(
                 "/api/v1/feedback",
-                headers={"Authorization": f"Bearer {self.token}"},
                 json={
                     "case_id": self.case_id,
                     "original_sar": self.results.get("json_analyze", {}).get("result", {}),
@@ -311,8 +275,7 @@ TXN-C004,2024-01-18 16:00:00,1200000,INR,ACCT-CSV-001,ACCT-OUT-999,Switzerland,s
             # Test feedback stats
             self.log("Testing /feedback/stats endpoint...", "INFO")
             response = await self.client.get(
-                "/api/v1/feedback/stats",
-                headers={"Authorization": f"Bearer {self.token}"}
+                "/api/v1/feedback/stats"
             )
             
             if response.status_code != 200:
@@ -401,7 +364,6 @@ async def main():
     async with NexusTester() as tester:
         # Run all tests
         await tester.test_health()
-        await tester.test_auth()
         await tester.test_analyze_json()
         await tester.test_analyze_csv()
         await tester.test_feedback()

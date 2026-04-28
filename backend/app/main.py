@@ -34,7 +34,6 @@ from app.core.exceptions import SARBaseException
 from app.core.logger import logger
 from app.core.middleware import RequestContextMiddleware
 from app.routes.analyze import router as analyze_router
-from app.routes.auth import router as auth_router
 from app.routes.feedback import router as feedback_router
 from app.routes.pipeline import router as pipeline_router
 
@@ -108,7 +107,6 @@ def create_app() -> FastAPI:
 
     # ── Routes ───────────────────────────────────────────
     app.include_router(analyze_router, prefix="/api/v1")
-    app.include_router(auth_router, prefix="/api/v1")
     app.include_router(feedback_router, prefix="/api/v1")
     app.include_router(pipeline_router, prefix="/api/v1")
 

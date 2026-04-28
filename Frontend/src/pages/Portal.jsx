@@ -1,22 +1,17 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useMemo, useRef, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { ToastProvider, useToasts } from '../components/PortalToasts.jsx'
 import FinanceBackground from '../components/FinanceBackground.jsx'
-import { analyzeCsv, getAnyToken, login, me, setSessionToken, setToken } from '../lib/api.js'
+import { analyzeCsv } from '../lib/api.js'
 import {
   Bolt,
   CloudUpload,
   FileText,
-  Fingerprint,
   FolderOpen,
-  LockKeyhole,
-  LogOut,
   X,
   Activity,
   ShieldAlert,
   Sparkles, 
-  Download, 
-  Wand2, 
   BookOpen, 
   ArrowRight, 
   Twitter, 
@@ -156,130 +151,7 @@ function parseJsonReport(res) {
 // COMPONENTS ADAPTED TO GRAYSCALE LIQUID GLASS
 // ----------------------------------------------------
 
-function LoginCard({ onAuthed }) {
-  const { push } = useToasts()
-  const [username, setUsername] = useState('admin')
-  const [password, setPassword] = useState('admin')
-  const [remember, setRemember] = useState(true)
-  const [busy, setBusy] = useState(false)
-  const [uErr, setUErr] = useState('')
-  const [pErr, setPErr] = useState('')
-
-  async function onSubmit(e) {
-    e.preventDefault()
-    const u = username.trim()
-    const p = password.trim()
-    setUErr(u ? '' : 'Agent ID is required')
-    setPErr(p ? '' : 'Access key is required')
-    if (!u || !p) {
-      push('Please fill in all fields.', 'error')
-      return
-    }
-
-    setBusy(true)
-    try {
-      const res = await login({ username: u, password: p })
-      if (remember) {
-        setToken(res.access_token)
-        setSessionToken('')
-      } else {
-        setSessionToken(res.access_token)
-        setToken('')
-      }
-      await me()
-      push(`Welcome, ${u}. Session initialized.`, 'success')
-      onAuthed?.(u)
-    } catch (err) {
-      setToken('')
-      setSessionToken('')
-      push(err?.message || 'Authentication failed', 'error')
-    } finally {
-      setBusy(false)
-    }
-  }
-
-  return (
-    <div className="w-full text-center text-white">
-      <div className="mx-auto mb-7 grid h-16 w-16 place-items-center rounded-2xl bg-white/10 text-white">
-        <Fingerprint className="h-7 w-7" />
-      </div>
-      <h2 className="text-[26px] font-medium tracking-tight">Secure Access</h2>
-      <p className="mt-2 text-[14px] leading-relaxed text-white/60">
-        Authenticate to access the Suspicious Activity Report portal.
-      </p>
-
-      <form onSubmit={onSubmit} className="mt-9 text-left">
-        <div className="mb-5">
-          <label className="mb-2 block text-xs uppercase tracking-widest text-white/50">Agent ID</label>
-          <input
-            value={username}
-            onChange={(e) => {
-              setUsername(e.target.value)
-              setUErr('')
-            }}
-            className="w-full rounded-lg bg-white/10 px-4 py-3 text-[14px] text-white outline-none focus:ring-1 focus:ring-white/50"
-            placeholder="Enter your agent identifier"
-            autoComplete="username"
-            autoFocus
-          />
-          {uErr && <div className="mt-2 text-[11px] text-red-400">{uErr}</div>}
-        </div>
-
-        <div className="mb-5">
-          <label className="mb-2 block text-xs uppercase tracking-widest text-white/50">Access Key</label>
-          <input
-            type="password"
-            value={password}
-            onChange={(e) => {
-              setPassword(e.target.value)
-              setPErr('')
-            }}
-            className="w-full rounded-lg bg-white/10 px-4 py-3 text-[14px] text-white outline-none focus:ring-1 focus:ring-white/50"
-            placeholder="Enter your access key"
-            autoComplete="current-password"
-          />
-          {pErr && <div className="mt-2 text-[11px] text-red-400">{pErr}</div>}
-        </div>
-
-        <div className="mb-7 flex items-center justify-between">
-          <label className="flex items-center gap-2 text-[13px] text-white/60 cursor-pointer">
-            <input
-              type="checkbox"
-              checked={remember}
-              onChange={(e) => setRemember(e.target.checked)}
-              className="h-4 w-4"
-            />
-            Remember session
-          </label>
-          <button type="button" className="text-[12px] text-white/80 hover:text-white transition-colors">
-            Forgot key?
-          </button>
-        </div>
-
-        <button
-          type="submit"
-          disabled={busy}
-          className="liquid-glass inline-flex w-full items-center justify-center gap-2 rounded-lg px-4 py-4 text-[14px] font-medium tracking-wide hover:scale-[1.02] active:scale-[0.98] transition-transform disabled:opacity-70"
-        >
-          {busy ? (
-            <span className="inline-flex items-center gap-2">
-              <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
-              Authenticating…
-            </span>
-          ) : (
-            <span className="inline-flex items-center gap-2">
-              <LockKeyhole className="h-4 w-4" />
-              Authenticate
-            </span>
-          )}
-        </button>
-      </form>
-    </div>
-  )
-}
-
 function DropZone({ onFiles, disabled }) {
-  const { push } = useToasts()
   const [drag, setDrag] = useState(false)
   const inputRef = useRef(null)
 
@@ -371,7 +243,7 @@ function FileRow({ item, onRemove }) {
   )
 }
 
-function UploadPage({ username, onLogout, analysisResult, setAnalysisResult, parsedSections }) {
+function UploadPage({ analysisResult, setAnalysisResult, parsedSections }) {
   const { push } = useToasts()
   const [files, setFiles] = useState([])
   const [busy, setBusy] = useState(false)
@@ -427,7 +299,7 @@ function UploadPage({ username, onLogout, analysisResult, setAnalysisResult, par
     setBusy(true)
     setAnalysisResult(null)
     try {
-      const res = await analyzeCsv({ file: ready[0].file, subjectAccount: username })
+      const res = await analyzeCsv({ file: ready[0].file, subjectAccount: 'public-analyst' })
       setAnalysisResult(res)
     } catch (e) {
       push(e?.message || 'Analysis failed', 'error')
@@ -493,9 +365,6 @@ function UploadPage({ username, onLogout, analysisResult, setAnalysisResult, par
           <div className="mt-6 flex justify-between items-center">
             <button onClick={() => setShowJson(!showJson)} className="text-xs text-white/50 hover:text-white underline">
               {showJson ? 'Hide Raw JSON' : 'Show Raw JSON'}
-            </button>
-            <button onClick={onLogout} className="text-xs text-red-400 hover:text-red-300 flex items-center gap-1">
-              <LogOut className="w-3 h-3" /> Logout
             </button>
           </div>
 
@@ -603,48 +472,12 @@ function KnowledgeGraphView({ parsedSections }) {
 // ----------------------------------------------------
 
 function PortalInner() {
-  const [authed, setAuthed] = useState(() => Boolean(getAnyToken()))
-  const [username, setUsername] = useState('')
-  const [modalView, setModalView] = useState(() => Boolean(getAnyToken()) ? null : 'login')
-  const [pendingView, setPendingView] = useState(null)
+  const [modalView, setModalView] = useState(null)
   
   const [analysisResult, setAnalysisResult] = useState(null)
   const parsedSections = useMemo(() => parseJsonReport(analysisResult?.result), [analysisResult])
 
-  useEffect(() => {
-    const t = getAnyToken()
-    if (!t) return
-    me()
-      .then((r) => {
-        setAuthed(true)
-        setUsername(r?.username || 'agent')
-      })
-      .catch(() => setAuthed(false))
-  }, [])
-
-  const onLogout = () => {
-    setToken('')
-    setSessionToken('')
-    setAuthed(false)
-    setUsername('')
-    setModalView('login')
-  }
-
-  const handleOpenView = (view) => {
-    if (!authed) {
-      setPendingView(view)
-      setModalView('login')
-    } else {
-      setModalView(view)
-    }
-  }
-
-  const handleAuthed = (u) => {
-    setAuthed(true)
-    setUsername(u)
-    setModalView(pendingView || 'upload')
-    setPendingView(null)
-  }
+  const handleOpenView = (view) => setModalView(view)
 
   const closeModal = () => setModalView(null)
 
@@ -735,9 +568,9 @@ function PortalInner() {
               </button>
             </div>
 
-            <button onClick={() => handleOpenView(authed ? 'upload' : 'login')} className="liquid-glass px-4 py-2 rounded-full flex items-center gap-2 hover:scale-105 transition-transform">
+            <button onClick={() => handleOpenView('upload')} className="liquid-glass px-4 py-2 rounded-full flex items-center gap-2 hover:scale-105 transition-transform">
               <Sparkles size={16} />
-              <span className="text-sm font-medium font-mono">{authed ? username : 'Login'}</span>
+              <span className="text-sm font-medium font-mono">Open Portal</span>
             </button>
           </div>
 
@@ -797,16 +630,9 @@ function PortalInner() {
             </button>
             
             <AnimatePresence mode="wait">
-              {modalView === 'login' && (
-                <motion.div key="login" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-                  <LoginCard onAuthed={handleAuthed} />
-                </motion.div>
-              )}
               {modalView === 'upload' && (
                 <motion.div key="upload" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
                   <UploadPage 
-                    username={username} 
-                    onLogout={onLogout} 
                     analysisResult={analysisResult} 
                     setAnalysisResult={setAnalysisResult} 
                     parsedSections={parsedSections} 
