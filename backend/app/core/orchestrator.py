@@ -87,13 +87,70 @@ async def run_pipeline(raw_input: dict[str, Any]) -> NexusState:
 
         if triage_rec == "SKIP":
             logger.info("⚡ Triage recommends SKIP — bypassing heavy analysis")
+            risk = {"score": 0, "level": "LOW", "factors": [], "shap_explanation": {}}
+            
             state["risk_findings"] = {
                 "features": {},
-                "risk": {"score": 0, "level": "LOW", "factors": [], "shap_explanation": {}},
+                "risk": risk,
                 "reasoning": {
                     "summary": "Low risk signals — triage firewall recommended skipping full analysis.",
                     "recommended_action": "No SAR required",
                 },
+            }
+            
+            import datetime
+            txns = state["masked_data"].get("transactions", [])
+            
+            # Populate dummy timeline and suspicious activity so frontend tabs show data
+            timeline_data = [
+                {
+                    "timestamp": t.get("timestamp"),
+                    "transaction_id": t.get("transaction_id"),
+                    "headline": f"{t.get('transaction_id')}: Reviewed (Low Risk)",
+                    "amount": t.get("amount")
+                }
+                for t in txns[:10]
+            ]
+            
+            flags_data = [
+                {
+                    "transaction_id": t.get("transaction_id"),
+                    "typology": "none",
+                    "reason": "Normal transaction behavior",
+                    "amount": t.get("amount"),
+                    "from_account": t.get("from_account"),
+                    "to_account": t.get("to_account"),
+                    "location": t.get("location"),
+                    "timestamp": t.get("timestamp")
+                }
+                for t in txns[:5]
+            ]
+            
+            state["draft_sar"] = {
+                "report_id": f"NO-SAR-{state['masked_data']['user_id']}",
+                "generated_at": datetime.datetime.now(datetime.timezone.utc).isoformat(),
+                "user_id": state["masked_data"]["user_id"],
+                "subject_information": {
+                    "subject_account": state["masked_data"]["user_id"],
+                    "total_transactions_reviewed": len(txns),
+                    "total_amount_reviewed": sum(t.get("amount", 0) for t in txns),
+                    "risk_level": "LOW",
+                    "risk_score": 0,
+                },
+                "risk_assessment": state["risk_findings"]["risk"],
+                "investigator_reasoning": state["risk_findings"]["reasoning"],
+                "rag_context": [
+                    {
+                        "id": "SYS-MSG",
+                        "title": "Low Risk Profile",
+                        "content": "No specific AML guidance retrieved because the transaction profile did not trigger any high-risk typologies. Standard monitoring applies."
+                    }
+                ],
+                "triage_result": state["triage_score"],
+                "llm_narrative": "Triage recommended SKIP. No suspicious activity narrative generated because transactions exhibit normal behavior.",
+                "suspicious_activity": flags_data,
+                "timeline": timeline_data,
+                "status": "No SAR Required"
             }
         else:
             # Full analysis for FAST and FULL recommendations

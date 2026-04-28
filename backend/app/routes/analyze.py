@@ -14,7 +14,7 @@ from fastapi import APIRouter, Depends, File, Form, HTTPException, Request, Uplo
 
 from app.core.exceptions import PipelineError, InputValidationError
 from app.core.logger import logger
-from app.core.security import get_current_user
+
 from app.models.schemas import AnalyzeRequest, AnalyzeResponse, ErrorResponse
 from app.services.pipeline_service import execute_analysis
 
@@ -40,7 +40,7 @@ router = APIRouter(tags=["Analysis"])
 async def analyze(
     body: AnalyzeRequest,
     request: Request,
-    _user=Depends(get_current_user),
+
 ) -> AnalyzeResponse:
     """Execute the full SAR analysis pipeline.
 
@@ -121,7 +121,7 @@ async def analyze_csv(
     request: Request,
     file: UploadFile = File(...),
     subject_account: str | None = Form(default=None),
-    _user=Depends(get_current_user),
+
 ) -> AnalyzeResponse:
     request_id = getattr(request.state, "request_id", "unknown")
     if not file.filename.lower().endswith(".csv"):

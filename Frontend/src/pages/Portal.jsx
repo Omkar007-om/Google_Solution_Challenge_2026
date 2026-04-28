@@ -26,7 +26,7 @@ import {
   Plus
 } from 'lucide-react'
 
-// Report Parser
+// Report Parser (Fallback for old text-based reports)
 function parseReport(reportText) {
   if (!reportText) return []
   const sectionHeaders = [
@@ -57,6 +57,99 @@ function parseReport(reportText) {
   }
   parsedSections.forEach(s => s.content = s.content.trim())
   return parsedSections.filter(s => s.content)
+}
+
+function parseJsonReport(res) {
+  if (!res) return [];
+  if (typeof res === 'string') return parseReport(res);
+  if (res.formatted_report) return parseReport(res.formatted_report);
+
+  const sections = [];
+  
+  sections.push({
+    id: 'general',
+    title: 'General Overview',
+    content: `Report ID: ${res.report_id || 'N/A'}\nGenerated At: ${res.generated_at || 'N/A'}\nSubject: ${res.user_id || 'N/A'}\nStatus: ${res.status || 'Draft'}`
+  });
+
+  sections.push({
+    id: 'subject_info',
+    title: 'Subject Information',
+    content: res.subject_information ? 
+      `Subject Account: ${res.subject_information.subject_account || res.user_id}\nTransactions Reviewed: ${res.subject_information.total_transactions_reviewed || 0}\nTotal Value Reviewed: ${res.subject_information.total_amount_reviewed || 0}\nRisk Profile: ${res.subject_information.risk_level} (${res.subject_information.risk_score}/100)` 
+      : "No subject information available."
+  });
+
+  sections.push({
+    id: 'executive_summary',
+    title: 'Executive Summary',
+    content: res.investigator_reasoning?.summary || "No executive summary available."
+  });
+
+  sections.push({
+    id: 'timeline',
+    title: 'Timeline of Material Events',
+    content: res.timeline && res.timeline.length > 0 
+      ? res.timeline.map(t => `- ${t.timestamp || 'N/A'}: ${t.headline || t.transaction_id || 'Event'} (Amt: ${t.amount || 0})`).join('\n') 
+      : "Timeline data not available."
+  });
+
+  sections.push({
+    id: 'aml_guidance',
+    title: 'Retrieved AML Guidance',
+    content: res.rag_context && res.rag_context.length > 0 
+      ? res.rag_context.map(r => `- [${r.id || 'UNKNOWN'}] ${r.title || 'Untitled'}:\n  ${r.content}`).join('\n\n')
+      : "No AML guidance retrieved."
+  });
+
+  sections.push({
+    id: 'transaction_profile',
+    title: 'Transaction Profile',
+    content: `Total Transactions: ${res.subject_information?.total_transactions_reviewed || 0}\nTotal Value: ${res.subject_information?.total_amount_reviewed || 0}\nHigh Risk Factors Detected: ${res.triage_result?.typologies_detected?.length || 0}\nTypologies: ${res.triage_result?.typologies_detected?.join(', ') || 'None'}`
+  });
+
+  let shapContent = "No SHAP explanation available.";
+  if (res.risk_assessment?.shap_explanation) {
+    const shap = res.risk_assessment.shap_explanation;
+    const drivers = shap.top_drivers?.map(d => `- ${d.display_name}: +${d.shap_value} risk points (${d.impact_pct}% impact).\n  ${d.reason}`).join('\n\n') || 'No top drivers.';
+    shapContent = `Method: ${shap.method || 'N/A'}\nBase Value: ${shap.base_value || 0}\nRaw Score Before Cap: ${shap.raw_score_before_cap || 0}\n\nTop Drivers:\n${drivers}`;
+  }
+
+  sections.push({
+    id: 'risk_assessment',
+    title: 'Risk Assessment',
+    content: res.risk_assessment ? 
+      `Risk Level: ${res.risk_assessment.level}\nRisk Score: ${res.risk_assessment.score}/100\nFactors:\n${res.risk_assessment.factors?.map(f => `- ${f}`).join('\n') || 'None'}`
+      : "No risk assessment available."
+  });
+
+  sections.push({
+    id: 'shap',
+    title: 'SHAP Explainability',
+    content: shapContent
+  });
+
+  sections.push({
+    id: 'narrative',
+    title: 'Suspicious Activity Narrative',
+    content: res.llm_narrative || "No narrative available."
+  });
+
+  sections.push({
+    id: 'key_evidence',
+    title: 'Key Evidence',
+    content: res.suspicious_activity && res.suspicious_activity.length > 0
+      ? res.suspicious_activity.map(flag => `- ${flag.transaction_id}: ${flag.reason} | Amount: ${flag.amount} | From: ${flag.from_account} | To: ${flag.to_account} | Location: ${flag.location}`).join('\n')
+      : "No key evidence available."
+  });
+
+  sections.push({
+    id: 'recommended_action',
+    title: 'Recommended Action',
+    content: res.investigator_reasoning?.recommended_action || "No recommended action."
+  });
+
+  return sections;
 }
 
 // ----------------------------------------------------
@@ -516,7 +609,7 @@ function PortalInner() {
   const [pendingView, setPendingView] = useState(null)
   
   const [analysisResult, setAnalysisResult] = useState(null)
-  const parsedSections = useMemo(() => parseReport(analysisResult?.result?.formatted_report), [analysisResult])
+  const parsedSections = useMemo(() => parseJsonReport(analysisResult?.result), [analysisResult])
 
   useEffect(() => {
     const t = getAnyToken()

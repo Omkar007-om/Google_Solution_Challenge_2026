@@ -329,6 +329,16 @@ async def sar_drafter(state: NexusState) -> NexusState:
         "rag_context": findings["rag_context"],
         "triage_result": triage,
         "llm_narrative": narrative,
+        "suspicious_activity": flags,
+        "timeline": [
+            {
+                "timestamp": f["timestamp"],
+                "transaction_id": f["transaction_id"],
+                "headline": f"{f['transaction_id']}: {f['typology'].replace('_', ' ')} - {f['reason']}",
+                "amount": f["amount"]
+            }
+            for f in sorted(flags, key=lambda x: str(x.get("timestamp") or ""))
+        ],
         "status": "Draft SAR Generated",
     }
 
